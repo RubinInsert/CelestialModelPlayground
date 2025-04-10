@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js Live Server</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
+            "three/examples/": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/"
+          }
+        }
+      </script>
+    <script type="module" src="main.js"></script>
+    <div id="config-chooser-container">
+        <input type="text" id="electron-config" placeholder="1s2 2s2 2p6 3s2 3p6 4s1 3d5" />
+        <button id="load-config" onclick="configChange()">Load Config</button>
+    </div>
+</body>
+</html>
