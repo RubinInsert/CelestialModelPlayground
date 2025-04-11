@@ -174,12 +174,12 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
         electronConfig: electronConfig,
         orbitals: [],
         remove: function () {
-            this.orbitals.particles.forEach((orbital) => {
-                if (orbital.parent) {
-                    orbital.parent.remove(orbital);
+            this.orbitals.forEach((orbital) => {
+                if (orbital.particles.parent) {
+                    orbital.particles.parent.remove(orbital.particles);
                 }
-                orbital.geometry.dispose();
-                orbital.material.dispose();
+                orbital.particles.geometry.dispose();
+                orbital.particles.material.dispose();
             });
             this.orbitals = []; // Clear the orbitals array
         },

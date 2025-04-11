@@ -35,5 +35,5 @@ window.addEventListener('resize', () => {
     SceneLoader.renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (async () => {
-    currentElement = await CelestialModel.createFromElectronConfig("1s1", 16);
+    //currentElement = await CelestialModel.createFromElectronConfig("1s1", 16);
 })();
