@@ -18,5 +18,5 @@ void main() {
 
     // Set the final position
     gl_Position = projectionMatrix * modelViewMatrix * vec4(scaledPosition, 1.0);
-    gl_PointSize = 2.0;
+    gl_PointSize = 3.0;
 }

@@ -100,7 +100,6 @@ const velocityTexture = gpuCompute.createTexture();
 
 const THRESHOLD = 5 * 0.01; // Adjust threshold based on energy level
 
-console.log(THRESHOLD)
 fillTextures(positionTexture, velocityTexture, orbitalLevel);
 
 
@@ -165,7 +164,7 @@ const particles = new THREE.Points(geometry, material);
 scene.add(particles);
 
 allRunningComputeShaders.push({computeShader: gpuCompute, material: material, positionVariable: positionVariable}); // Store the GPUComputeRenderer for later use
-return particles;
+return {orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles};
 }
 
 async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRatio = 32) {
@@ -175,7 +174,7 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
         electronConfig: electronConfig,
         orbitals: [],
         remove: function () {
-            this.orbitals.forEach((orbital) => {
+            this.orbitals.particles.forEach((orbital) => {
                 if (orbital.parent) {
                     orbital.parent.remove(orbital);
                 }
@@ -183,9 +182,10 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
                 orbital.material.dispose();
             });
             this.orbitals = []; // Clear the orbitals array
-        }
+        },
     };
     let highestOrbitalLevel = 1;
+    const orbitalPromises = []; // Array to hold promises to the function doesn't return before all promises are resolved
     individualOrbits.forEach((orbit) => {
         const orbitalLevel = parseInt(orbit[0]);
         highestOrbitalLevel = Math.max(highestOrbitalLevel, orbitalLevel);
@@ -194,34 +194,34 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
         orbit = orbit.slice(1); // Remove the first character from the string
         const orbitalElectronCount = parseInt(orbit);
         let electronSqrtPerOrbital;
-        switch(orbitalType) {
+        switch (orbitalType) {
             case 'S':
-                elementObject.orbitals.push(createOrbital(sqrtElectronRatio, OrbitalType.S, orbitalLevel));
+                orbitalPromises.push(createOrbital(sqrtElectronRatio, OrbitalType.S, orbitalLevel));
                 break;
             case 'P':
                 electronSqrtPerOrbital = Math.floor(sqrtElectronRatio * orbitalElectronCount / 3);
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Px, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Py, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Pz, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Px, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Py, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Pz, orbitalLevel));
                 break;
             case 'D':
-                electronSqrtPerOrbital = Math.floor(sqrtElectronRatio * orbitalElectronCount / 5); 
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dxy, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dxz, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dyz, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dx2y2, orbitalLevel));
-                elementObject.orbitals.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dz2, orbitalLevel));
+                electronSqrtPerOrbital = Math.floor(sqrtElectronRatio * orbitalElectronCount / 5);
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dxy, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dxz, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dyz, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dx2y2, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dz2, orbitalLevel));
                 break;
             default:
                 console.error(`Unknown orbital type: ${orbitalType}`);
         }
     });
-
-    elementObject.orbitals = await Promise.all(elementObject.orbitals); // Wait for all orbital promises to resolve
+    
+    elementObject.orbitals = await Promise.all(orbitalPromises); // Wait for all orbital promises to resolve
     const maxDistance = highestOrbitalLevel * 10; // Adjust the multiplier as needed
     elementObject.highestOrbitalLevel = highestOrbitalLevel;
     elementObject.orbitals.forEach((orbit) => {
-        orbit.material.uniforms.maxDistance = { value: maxDistance }; // For the colour visualisation in fragment shader
+        orbit.particles.material.uniforms.maxDistance = { value: maxDistance }; // For the colour visualisation in fragment shader
     });
     return elementObject;
 }

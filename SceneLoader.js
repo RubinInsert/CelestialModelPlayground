@@ -7,6 +7,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 const light = new THREE.PointLight(0xffffff, 50, 100);
 light.position.set(10, 10, 10);
 scene.add(light);
+renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
