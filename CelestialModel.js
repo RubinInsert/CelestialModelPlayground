@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
-import { GPUComputationRenderer } from 'three/examples/misc/GPUComputationRenderer.js';
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js';
+import { GPUComputationRenderer } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/misc/GPUComputationRenderer.js';
 
 let scene, camera, renderer;
 let positionShaderCode, vertexShaderCode, fragmentShaderCode; // Only get this code once in init function, reduce network requests
@@ -234,7 +234,8 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
 // Update function for the animate loop
 function updateParticles() {
     if (!isInitialized) return;
-    const deltaTime = clock.getDelta(); // Call once per frame
+    const deltaTime = Math.min(clock.getDelta(), 0.05); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
+    
     for (let i = 0; i < allRunningComputeShaders.length; i++) {
         allRunningComputeShaders[i].computeShader.compute();
         allRunningComputeShaders[i].material.uniforms.texturePosition.value = allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(allRunningComputeShaders[i].positionVariable).texture;
