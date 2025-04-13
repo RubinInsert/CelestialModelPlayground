@@ -3,7 +3,9 @@ import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
 import { GPUComputationRenderer } from 'three/examples/misc/GPUComputationRenderer.js';
 
 let scene, camera, renderer;
+let positionShaderCode, vertexShaderCode, fragmentShaderCode; // Only get this code once in init function, reduce network requests
 let isInitialized = false;
+let clock = new THREE.Clock();
 // START - * Helper Functions *
 async function loadShader(url) {
     const response = await fetch(url);
@@ -78,18 +80,20 @@ const OrbitalType = Object.freeze({
 });
 
 
-function init(inputScene, inputRenderer) {
+async function init(inputScene, inputRenderer) {
     scene = inputScene;
     renderer = inputRenderer;
+    [positionShaderCode, vertexShaderCode, fragmentShaderCode] = await Promise.all([
+        loadShader('./shaders/positionShader.glsl'),
+        loadShader('./shaders/vertexShader.glsl'),
+        loadShader('./shaders/fragmentShader.glsl')
+    ]);
     isInitialized = true;
 }
 // Create a GPUComputeRenderer
 async function createOrbital(numParticlesSqrt = 64, orbitalType = OrbitalType.S, orbitalLevel = 1) {
     if(!isInitialized) return false; // Ensure the module is initialized before creating an orbital
-const positionShaderCode = await loadShader(`./shaders/${orbitalType}/positionShader.glsl`);
 const velocityShaderCode = await loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
-const vertexShaderCode = await loadShader('./shaders/vertexShader.glsl');
-const fragmentShaderCode = await loadShader('./shaders/fragmentShader.glsl');
 const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
 const gpuCompute = new GPUComputationRenderer(numParticlesSqrt, numParticlesSqrt, renderer);
 
@@ -116,6 +120,7 @@ const velocityVariable = gpuCompute.addVariable(
     velocityTexture
 );
 velocityVariable.material.uniforms.threshold = { value: THRESHOLD };
+positionVariable.material.uniforms.deltaTime = { value: 0.0 }; // Initialize deltaTime
 // Set dependencies between variables
 gpuCompute.setVariableDependencies(positionVariable, [positionVariable, velocityVariable]);
 gpuCompute.setVariableDependencies(velocityVariable, [positionVariable, velocityVariable]);
@@ -168,6 +173,7 @@ return {orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particl
 }
 
 async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRatio = 32) {
+    if (!isInitialized) throw new Error("Module not initialized. Call init() first.");
     let individualOrbits = electronConfig.split(' ');
     let elementObject = {
         highestOrbitalLevel: 1,
@@ -227,9 +233,12 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
 }
 // Update function for the animate loop
 function updateParticles() {
+    if (!isInitialized) return;
+    const deltaTime = clock.getDelta(); // Call once per frame
     for (let i = 0; i < allRunningComputeShaders.length; i++) {
         allRunningComputeShaders[i].computeShader.compute();
         allRunningComputeShaders[i].material.uniforms.texturePosition.value = allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(allRunningComputeShaders[i].positionVariable).texture;
+        allRunningComputeShaders[i].positionVariable.material.uniforms.deltaTime.value = deltaTime;
     }
 }
 

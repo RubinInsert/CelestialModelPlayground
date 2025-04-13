@@ -2,8 +2,6 @@ import * as THREE from 'three';
 import * as CelestialModel from './CelestialModel.js';
 import * as SceneLoader from './SceneLoader.js';
 
-
-CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 1);
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Px, 1);
 const scaleFactor = 1;
@@ -35,5 +33,6 @@ window.addEventListener('resize', () => {
     SceneLoader.renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (async () => {
-    //currentElement = await CelestialModel.createFromElectronConfig("1s1", 16);
+    await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
+    currentElement = await CelestialModel.createFromElectronConfig("1s2 2s2 2p6 3s2 3p6 3d10 4s2 4p6 4d5 5s1", 16); // Molybdenum example
 })();
