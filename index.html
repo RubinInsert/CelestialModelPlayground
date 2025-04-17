@@ -8,6 +8,7 @@
 </head>
 <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script type="importmap">
         {
           "imports": {
@@ -19,7 +20,7 @@
     <script type="module" src="main.js"></script>
     <div id="config-chooser-container">
         <input type="text" id="electron-config" placeholder="1s2 2s2 2p6 3s2 3p6 4s1 3d5" />
-        <button id="load-config" onclick="configChange()">Load Config</button>
+        <button id="load-config">Load Config</button>
     </div>
 </body>
 </html>

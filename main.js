@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import * as CelestialModel from './CelestialModel.js';
+import CelestialModel from './CelestialModel/CelestialModel.js';
 import * as SceneLoader from './SceneLoader.js';
 
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 1);
@@ -20,7 +20,7 @@ document.getElementById('load-config').addEventListener('click', async () => {
 });
 function animate() {
     requestAnimationFrame(animate);
-    CelestialModel.updateParticles()
+    CelestialModel.updateParticles();
     SceneLoader.renderer.render(SceneLoader.scene, SceneLoader.camera);
     SceneLoader.controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
 }
@@ -45,12 +45,8 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-    currentElement = await CelestialModel.createFromElectronConfig("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16);
-    for (let level = 1; level <= 7; level++) {
-        //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.S, level, colors[level - 1]);
-    }
-    //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 4);
-    //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Fz_x2_minus_y2, 4);
+        currentElement = new CelestialModel("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16);
+        await currentElement.create();
 })();
 const axesHelper = new THREE.AxesHelper(5);
 SceneLoader.scene.add(axesHelper);
