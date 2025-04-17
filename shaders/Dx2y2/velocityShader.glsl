@@ -42,6 +42,8 @@ vec3 gradientPsiSquared(vec3 point) {
             random(uv + vec2(0.3, 0.4)) * randomFactor - randomFactor / 2.0,
             random(uv + vec2(0.5, 0.6)) * randomFactor - randomFactor / 2.0
         );
+        vec3 centralForce = -normalize(position.xyz) * 0.003;
+        velocity.xyz += centralForce;
         velocity.xyz = clamp(velocity.xyz, -0.5, 0.5);
         gl_FragColor = velocity;
     }

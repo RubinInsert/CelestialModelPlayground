@@ -14,8 +14,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // Optional: for smoother controls
 controls.dampingFactor = 0.05;
 controls.update();
-camera.position.z = 100; // TODO: Calculate bounding box of Celestial models
-
+camera.position.z = 5; // TODO: Calculate bounding box of Celestial models
 
 const loader = new GLTFLoader();
 // loader.load('./modelTest2.glb', (gltf) => {

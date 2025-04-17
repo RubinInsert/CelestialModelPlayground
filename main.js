@@ -34,5 +34,23 @@ window.addEventListener('resize', () => {
 });
 (async () => {
     await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
-    currentElement = await CelestialModel.createFromElectronConfig("1s2 2s2 2p6 3s2 3p6 3d10 4s2 4p6 4d5 5s1", 16); // Molybdenum example
+     //currentElement = await CelestialModel.createFromElectronConfig("1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10", 16)
+    //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.S, 5, new THREE.Vector4(0, 0, 1.0, 1.0));
+    const colors = [
+        new THREE.Vector4(1.0, 0, 0, 1.0), // Red
+        new THREE.Vector4(0, 1.0, 0, 1.0), // Green
+        new THREE.Vector4(0, 0, 1.0, 1.0), // Blue
+        new THREE.Vector4(1.0, 1.0, 0, 1.0), // Yellow
+        new THREE.Vector4(1.0, 0, 1.0, 1.0), // Magenta
+        new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
+        new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
+    ];
+    currentElement = await CelestialModel.createFromElectronConfig("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16);
+    for (let level = 1; level <= 7; level++) {
+        //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.S, level, colors[level - 1]);
+    }
+    //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 4);
+    //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Fz_x2_minus_y2, 4);
 })();
+const axesHelper = new THREE.AxesHelper(5);
+SceneLoader.scene.add(axesHelper);

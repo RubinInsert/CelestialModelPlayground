@@ -29,4 +29,5 @@ void main() {
 
     // Set the particle color
     gl_FragColor = vec4(color, 1.0);
+
 }

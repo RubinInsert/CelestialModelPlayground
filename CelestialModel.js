@@ -2,8 +2,10 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@latest/build/three.mo
 import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/loaders/GLTFLoader.js';
 import { GPUComputationRenderer } from 'https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/misc/GPUComputationRenderer.js';
 
+
+// https://winter.group.shef.ac.uk/orbitron/atomic_orbitals/2s/index.html
 let scene, camera, renderer;
-let positionShaderCode, vertexShaderCode, fragmentShaderCode; // Only get this code once in init function, reduce network requests
+let positionShaderCode, vertexShaderCode, fragmentShaderCode, debugFragShader; // Only get this code once in init function, reduce network requests
 let isInitialized = false;
 let clock = new THREE.Clock();
 // START - * Helper Functions *
@@ -76,22 +78,46 @@ const OrbitalType = Object.freeze({
     Dxz: 'Dxz', // TODO Alignments\
     Dyz: 'Dyz', // TODO Alignments
     Dz2: 'Dz2', // TODO Alignments
-    F: 'F', // TODO Alignments
+    Fxyz: 'Fxyz', // TODO Alignments
+    Fx_z2_minus_y2: 'Fx_z2_minus_y2', // TODO Alignments
+    Fy_z2_minus_x2: 'Fy_z2_minus_x2', // TODO Alignments
+    Fz_x2_minus_y2: 'Fz_x2_minus_y2', // TODO Alignments
+    Fy3: 'Fy3', // TODO Alignments
+    Fx3: 'Fx3', // TODO Alignments
+    Fz3: 'Fz3', // TODO Alignments
 });
-
+const OrbitalScale = Object.freeze({
+    "S": 1,
+    "Px": 1,
+    "Py": 1,
+    "Pz": 1,
+    "Dxy": 0.85,
+    "Dx2y2": 0.85,
+    "Dxz": 0.85,
+    "Dyz": 0.85,
+    "Dz2": 1,
+    "Fxyz": 0.7,
+    "Fx_z2_minus_y2": 1,
+    "Fy_z2_minus_x2": 1,
+    "Fz_x2_minus_y2": 1,
+    "Fy3": 0.7,
+    "Fx3": 0.7,
+    "Fz3": 0.7,
+});
 
 async function init(inputScene, inputRenderer) {
     scene = inputScene;
     renderer = inputRenderer;
-    [positionShaderCode, vertexShaderCode, fragmentShaderCode] = await Promise.all([
+    [positionShaderCode, vertexShaderCode, fragmentShaderCode, debugFragShader] = await Promise.all([
         loadShader('./shaders/positionShader.glsl'),
         loadShader('./shaders/vertexShader.glsl'),
-        loadShader('./shaders/fragmentShader.glsl')
+        loadShader('./shaders/fragmentShader.glsl'),
+        loadShader('./shaders/debugFragShader.glsl')
     ]);
     isInitialized = true;
 }
 // Create a GPUComputeRenderer
-async function createOrbital(numParticlesSqrt = 64, orbitalType = OrbitalType.S, orbitalLevel = 1) {
+async function createOrbital(numParticlesSqrt = 64, orbitalType = OrbitalType.S, orbitalLevel = 1, colour = new THREE.Vector4(1,1,1,1)) {
     if(!isInitialized) return false; // Ensure the module is initialized before creating an orbital
 const velocityShaderCode = await loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
 const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
@@ -157,8 +183,9 @@ geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
 
 const material = new THREE.ShaderMaterial({
     uniforms: {
+        colour: { value: colour},
         texturePosition: { value: null },
-        scale: { value: Math.pow(orbitalLevel, 2) },
+        scale: { value: Math.pow(orbitalLevel, 2) * OrbitalScale[orbitalType] },
     },
     vertexShader: vertexShaderCode,
     fragmentShader: fragmentShaderCode,
@@ -218,13 +245,23 @@ async function createFromElectronConfig(electronConfig = "1s1", sqrtElectronRati
                 orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dx2y2, orbitalLevel));
                 orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Dz2, orbitalLevel));
                 break;
+            case 'F':
+                electronSqrtPerOrbital = Math.floor(sqrtElectronRatio * orbitalElectronCount / 7);
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fxyz, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fx_z2_minus_y2, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fy_z2_minus_x2, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fz_x2_minus_y2, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fy3, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fx3, orbitalLevel));
+                orbitalPromises.push(createOrbital(electronSqrtPerOrbital, OrbitalType.Fz3, orbitalLevel));
+                break;
             default:
                 console.error(`Unknown orbital type: ${orbitalType}`);
         }
     });
     
     elementObject.orbitals = await Promise.all(orbitalPromises); // Wait for all orbital promises to resolve
-    const maxDistance = highestOrbitalLevel * 10; // Adjust the multiplier as needed
+    const maxDistance = Math.pow(highestOrbitalLevel, 2) * 2.5; // Adjust the multiplier as needed
     elementObject.highestOrbitalLevel = highestOrbitalLevel;
     elementObject.orbitals.forEach((orbit) => {
         orbit.particles.material.uniforms.maxDistance = { value: maxDistance }; // For the colour visualisation in fragment shader
