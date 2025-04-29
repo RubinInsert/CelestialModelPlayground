@@ -54,5 +54,5 @@ window.addEventListener('resize', () => {
         // SceneLoader.scene.add(boxHelper);
          SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
 })();
-const axesHelper = new THREE.AxesHelper(5);
-SceneLoader.scene.add(axesHelper);
+// const axesHelper = new THREE.AxesHelper(5);
+// SceneLoader.scene.add(axesHelper);
