@@ -50,18 +50,19 @@ class CelestialModel {
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
     static #emissionSpectrumData = null;
-    constructor(electronConfig = "1s1", sqrtElectronRatio = 32, chemSymbol = "H") {
+    static #electronConfigData = null;
+    constructor(chemSymbol = "H", sqrtElectronRatio = 32, ) {
+        this.chemSymbol = chemSymbol.charAt(0).toUpperCase() + chemSymbol.slice(1).toLowerCase();
         if (!CelestialModel.isInitialized) {
             throw new Error("CelestialModel.init() must be called before creating instances.");
         }
-        if (!/^\d+[spdf]\d+(\s\d+[spdf]\d+)*$/.test(electronConfig)) {
-            throw new Error(`Invalid electron configuration: ${electronConfig}`);
+        if (!CelestialModel.#electronConfigData[this.chemSymbol]) {
+            throw new Error(`Invalid chemical symbol.`);
         }
-        this.electronConfig = electronConfig;
+        this.electronConfig = CelestialModel.#electronConfigData[this.chemSymbol];
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
-        this.chemSymbol = chemSymbol;
-        this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(electronConfig);
+        this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
         let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
         this.boundingBox = new THREE.Box3(new THREE.Vector3(-maxDistance, -maxDistance, -maxDistance),
                                          new THREE.Vector3(maxDistance, maxDistance, maxDistance));
@@ -78,12 +79,14 @@ class CelestialModel {
             CelestialModel.#fragmentShaderCode,
             CelestialModel.#debugFragShader,
             CelestialModel.#emissionSpectrumData,
+            CelestialModel.#electronConfigData,
         ] = await Promise.all([
             CelestialModel.#loadShader('./shaders/positionShader.glsl'),
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
             CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
             CelestialModel.#loadJSON('./EmissionSpectra.json'),
+            CelestialModel.#loadJSON('./ElectronConfig.json'),
         ]);
 
         CelestialModel.isInitialized = true;
@@ -286,12 +289,10 @@ class CelestialModel {
         return [r, g, b]; // Return as an array
     }
     static createSpectrumTexture(wavelengths) {
-        console.log(wavelengths);
         const size = wavelengths.length;
         const data = new Uint8Array(size * 4); // RGB values for each wavelength
         // Map each wavelength to RGB and store in the texture data
         wavelengths.forEach((wavelength, i) => {
-            console.log(CelestialModel.hexToRgb(wavelength));
             const [R, G, B] = CelestialModel.hexToRgb(wavelength);
             
             data[i * 4] = R;     // Red
@@ -325,7 +326,6 @@ class CelestialModel {
     
         // Position the plane in front of the camera
         plane.position.set(0, 0, -2); // Adjust the Z position as needed
-        console.log(plane);
     }
     static getEmissionSpectrum(elementName) {
         const elementWaveLengths = CelestialModel.#emissionSpectrumData[elementName];

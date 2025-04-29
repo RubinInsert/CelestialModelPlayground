@@ -13,7 +13,7 @@ document.getElementById('load-config').addEventListener('click', async () => {
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel(electronConfig, 16);
+        currentElement = new CelestialModel("H", 16);
         await currentElement.create();
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
         CelestialModel.getEmissionSpectrum("He");
@@ -48,7 +48,7 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-        currentElement = new CelestialModel("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16, "H");
+        currentElement = new CelestialModel("Dy", 16);
         await currentElement.create();
         CelestialModel.getEmissionSpectrum("Fe");
         console.log(currentElement);
