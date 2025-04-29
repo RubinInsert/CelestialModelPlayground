@@ -50,7 +50,7 @@ function fitCameraToBoundingBox(boundingBox) {
     camera.position.copy(boxCenter.clone().sub(direction.multiplyScalar(distance * 1.2)));
 
     camera.near = 0.1;
-    camera.far = distance * 3;
+    camera.far = distance * 10;
     camera.updateProjectionMatrix();
 
     if (controls) {
