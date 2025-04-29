@@ -7,16 +7,15 @@ import * as SceneLoader from './SceneLoader.js';
 const scaleFactor = 1;
 let currentElement = null;
 document.getElementById('load-config').addEventListener('click', async () => {
-    const electronConfig = document.getElementById('electron-config').value.trim();
-    if (electronConfig) {
+    const chemName = document.getElementById('electron-config').value.trim();
+    if (chemName) {
         // Call createFromElectronConfig with the input value
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel("H", 16);
+        currentElement = new CelestialModel(chemName, 16);
         await currentElement.create();
-        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
-        CelestialModel.getEmissionSpectrum("He");
+        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);;
     } else {
         console.error('Electron configuration input is empty.');
     }
@@ -48,9 +47,8 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-        currentElement = new CelestialModel("Dy", 16);
+        currentElement = new CelestialModel("Mo", 16);
         await currentElement.create();
-        CelestialModel.getEmissionSpectrum("Fe");
         console.log(currentElement);
         // const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
         // SceneLoader.scene.add(boxHelper);
