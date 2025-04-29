@@ -15,7 +15,8 @@ document.getElementById('load-config').addEventListener('click', async () => {
         }
         currentElement = new CelestialModel(chemName, 16);
         await currentElement.create();
-        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);;
+        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
+        document.getElementById('electron-config').value = ''; // Clear the input field after loading
     } else {
         console.error('Electron configuration input is empty.');
     }
