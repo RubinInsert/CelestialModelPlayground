@@ -50,7 +50,7 @@ class CelestialModel {
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
     static #emissionSpectrumData = null;
-    constructor(electronConfig = "1s1", sqrtElectronRatio = 32) {
+    constructor(electronConfig = "1s1", sqrtElectronRatio = 32, chemSymbol = "H") {
         if (!CelestialModel.isInitialized) {
             throw new Error("CelestialModel.init() must be called before creating instances.");
         }
@@ -60,6 +60,7 @@ class CelestialModel {
         this.electronConfig = electronConfig;
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
+        this.chemSymbol = chemSymbol;
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(electronConfig);
         let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
         this.boundingBox = new THREE.Box3(new THREE.Vector3(-maxDistance, -maxDistance, -maxDistance),
@@ -154,7 +155,7 @@ class CelestialModel {
         return new THREE.Vector3(x, y, z);
     }
 
-    async #createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1, colour = new THREE.Vector4(1, 1, 1, 1)) {
+    async #createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
         if (!CelestialModel.isInitialized) return false; // Ensure the module is initialized before creating an orbital
         const velocityShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
         const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
@@ -217,8 +218,7 @@ class CelestialModel {
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         const material = new THREE.ShaderMaterial({
             uniforms: {
-                colour: { value: colour },
-                atomicEmissionSpectrum: { value: CelestialModel.createSpectrumTexture(CelestialModel.#emissionSpectrumData["H"]) },
+                atomicEmissionSpectrum: { value: CelestialModel.createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
             },
@@ -286,6 +286,7 @@ class CelestialModel {
         return [r, g, b]; // Return as an array
     }
     static createSpectrumTexture(wavelengths) {
+        console.log(wavelengths);
         const size = wavelengths.length;
         const data = new Uint8Array(size * 4); // RGB values for each wavelength
         // Map each wavelength to RGB and store in the texture data
@@ -326,9 +327,7 @@ class CelestialModel {
         plane.position.set(0, 0, -2); // Adjust the Z position as needed
         console.log(plane);
     }
-    static async getEmissionSpectrum(elementName) {
-        //const waveLengths = await CelestialModel.getEmissionSpectrumData(elementName);
-        console.log(CelestialModel.#emissionSpectrumData);
+    static getEmissionSpectrum(elementName) {
         const elementWaveLengths = CelestialModel.#emissionSpectrumData[elementName];
         if (!elementWaveLengths) {
             console.error(`No emission spectrum data found for element: ${elementName}`);

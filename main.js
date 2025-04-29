@@ -48,12 +48,13 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-        currentElement = new CelestialModel("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16);
+        currentElement = new CelestialModel("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16, "H");
         await currentElement.create();
-        CelestialModel.getEmissionSpectrum("H");
+        CelestialModel.getEmissionSpectrum("Fe");
+        console.log(currentElement);
         // const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
         // SceneLoader.scene.add(boxHelper);
-        // SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
+         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
 })();
 const axesHelper = new THREE.AxesHelper(5);
 SceneLoader.scene.add(axesHelper);
