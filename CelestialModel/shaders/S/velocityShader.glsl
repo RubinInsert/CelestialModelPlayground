@@ -15,7 +15,7 @@ void main() {
     vec4 velocity = texture2D(textureVelocity, uv);
     
     // Apply some simple physics (e.g., gravity)
-    if (!isInsideSOrbital(position.xyz, 2.5)) { // Use a radius of 0.5 for the S orbital
+    if (!isInsideSOrbital(position.xyz, 2.5)) { // Use a radius of 2.5 for the S orbital
         vec3 direction = normalize(position.xyz); // Direction pointing outward
         velocity.xyz -= direction * 0.01; // Push particles back towards the circle
     }

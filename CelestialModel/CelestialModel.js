@@ -49,7 +49,7 @@ class CelestialModel {
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
-
+    static #emissionSpectrumData = null;
     constructor(electronConfig = "1s1", sqrtElectronRatio = 32) {
         if (!CelestialModel.isInitialized) {
             throw new Error("CelestialModel.init() must be called before creating instances.");
@@ -76,11 +76,13 @@ class CelestialModel {
             CelestialModel.#vertexShaderCode,
             CelestialModel.#fragmentShaderCode,
             CelestialModel.#debugFragShader,
+            CelestialModel.#emissionSpectrumData,
         ] = await Promise.all([
             CelestialModel.#loadShader('./shaders/positionShader.glsl'),
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
             CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
+            CelestialModel.#loadJSON('./EmissionSpectra.json'),
         ]);
 
         CelestialModel.isInitialized = true;
@@ -99,9 +101,16 @@ class CelestialModel {
     static async #loadShader(url) {
         const response = await fetch(new URL(url, import.meta.url).href);
         if (!response.ok) {
-            throw new Error(`Failed to load shader from ${url}: ${response.statusText}`);
+            throw new Error(`Failed to load shader from ${new URL(url, import.meta.url).href}: ${response.statusText}`);
         }
         return await response.text();
+    }
+    static async #loadJSON(url) {
+        const response = await fetch(new URL(url, import.meta.url).href);
+        if (!response.ok) {
+            throw new Error(`Failed to load JSON from ${new URL(url, import.meta.url).href}: ${response.statusText}`);
+        }
+        return await response.json();
     }
 
     static #rand() {
@@ -206,10 +215,10 @@ class CelestialModel {
 
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
-
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 colour: { value: colour },
+                atomicEmissionSpectrum: { value: CelestialModel.createSpectrumTexture(CelestialModel.#emissionSpectrumData["H"]) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
             },
@@ -228,7 +237,106 @@ class CelestialModel {
         }); // Store the GPUComputeRenderer for later use
         return { orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles };
     }
-
+    static wavelengthToRGB(wavelength) {
+        let R = 0, G = 0, B = 0;
+    
+        if (wavelength >= 380 && wavelength < 440) {
+            R = -(wavelength - 440) / (440 - 380);
+            G = 0.0;
+            B = 1.0;
+        } else if (wavelength >= 440 && wavelength < 490) {
+            R = 0.0;
+            G = (wavelength - 440) / (490 - 440);
+            B = 1.0;
+        } else if (wavelength >= 490 && wavelength < 510) {
+            R = 0.0;
+            G = 1.0;
+            B = -(wavelength - 510) / (510 - 490);
+        } else if (wavelength >= 510 && wavelength < 580) {
+            R = (wavelength - 510) / (580 - 510);
+            G = 1.0;
+            B = 0.0;
+        } else if (wavelength >= 580 && wavelength < 645) {
+            R = 1.0;
+            G = -(wavelength - 645) / (645 - 580);
+            B = 0.0;
+        } else if (wavelength >= 645 && wavelength <= 750) {
+            R = 1.0;
+            G = 0.0;
+            B = 0.0;
+        }
+    
+        // Adjust intensity for wavelengths near the edges of the visible spectrum
+        let factor = 1.0;    
+        R = Math.pow(R * factor, 0.8);
+        G = Math.pow(G * factor, 0.8);
+        B = Math.pow(B * factor, 0.8);
+        
+        return [R * 255, G * 255, B * 255]; // Return RGB values as an array
+    }
+    static hexToRgb(hex) {
+        // Remove the '#' if it exists
+        hex = hex.replace(/^#/, '');
+    
+        // Parse the red, green, and blue components
+        const r = parseInt(hex.substring(0, 2), 16); // Red
+        const g = parseInt(hex.substring(2, 4), 16); // Green
+        const b = parseInt(hex.substring(4, 6), 16); // Blue
+    
+        return [r, g, b]; // Return as an array
+    }
+    static createSpectrumTexture(wavelengths) {
+        const size = wavelengths.length;
+        const data = new Uint8Array(size * 4); // RGB values for each wavelength
+        // Map each wavelength to RGB and store in the texture data
+        wavelengths.forEach((wavelength, i) => {
+            console.log(CelestialModel.hexToRgb(wavelength));
+            const [R, G, B] = CelestialModel.hexToRgb(wavelength);
+            
+            data[i * 4] = R;     // Red
+            data[i * 4 + 1] = G; // Green
+            data[i * 4 + 2] = B; // Blue
+            data[i * 4 + 3] = 255; // Alpha
+        });
+    
+        // Create the texture
+        const texture = new THREE.DataTexture(data, size, 1, THREE.RGBAFormat, THREE.UnsignedByteType);
+        texture.generateMipmaps = false; // Disable mipmaps for non-POT textures
+        texture.minFilter = THREE.LinearFilter; // Blends the colours in the texture
+        texture.magFilter = THREE.LinearFilter;
+        texture.needsUpdate = true; // Mark the texture as needing an update
+        return texture;
+    }
+    static visualizeTexture(texture, scene) {
+        // Create a plane geometry
+        const planeGeometry = new THREE.PlaneGeometry(2, 2); // Size of the plane
+    
+        // Create a material using the texture
+        const planeMaterial = new THREE.MeshBasicMaterial({
+            map: texture, // Use the texture
+        });
+    
+        // Create a mesh with the geometry and material
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+    
+        // Add the plane to the scene
+        CelestialModel.scene.add(plane);
+    
+        // Position the plane in front of the camera
+        plane.position.set(0, 0, -2); // Adjust the Z position as needed
+        console.log(plane);
+    }
+    static async getEmissionSpectrum(elementName) {
+        //const waveLengths = await CelestialModel.getEmissionSpectrumData(elementName);
+        console.log(CelestialModel.#emissionSpectrumData);
+        const elementWaveLengths = CelestialModel.#emissionSpectrumData[elementName];
+        if (!elementWaveLengths) {
+            console.error(`No emission spectrum data found for element: ${elementName}`);
+            return;
+        }
+        let spectrumTexture = CelestialModel.createSpectrumTexture(elementWaveLengths);
+        CelestialModel.visualizeTexture(spectrumTexture, CelestialModel.scene);
+    }
     async #createFromElectronConfig() {
         const individualOrbits = this.electronConfig.split(' ');
         const orbitalPromises = [];

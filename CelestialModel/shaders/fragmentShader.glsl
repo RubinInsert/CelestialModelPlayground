@@ -1,6 +1,6 @@
+uniform sampler2D atomicEmissionSpectrum;
 uniform float maxDistance; // Add maxDistance as a uniform
 varying vec3 vPosition; // Particle position passed from the vertex shader
-
 void main() {
     // Calculate the distance from the center
     float distance = length(vPosition);
@@ -17,15 +17,16 @@ void main() {
 
     // Interpolate between the colors based on normalizedDistance
     vec3 color;
-    if (normalizedDistance < 0.25) {
-        color = mix(color1, color2, normalizedDistance / 0.25);
-    } else if (normalizedDistance < 0.5) {
-        color = mix(color2, color3, (normalizedDistance - 0.25) / 0.25);
-    } else if (normalizedDistance < 0.75) {
-        color = mix(color3, color4, (normalizedDistance - 0.5) / 0.25);
-    } else {
-        color = mix(color4, color5, (normalizedDistance - 0.75) / 0.25);
-    }
+    color = texture2D(atomicEmissionSpectrum, vec2(normalizedDistance, 0.5)).rgb;
+    // if (normalizedDistance < 0.25) {
+    //     color = mix(color1, color2, normalizedDistance / 0.25);
+    // } else if (normalizedDistance < 0.5) {
+    //     color = mix(color2, color3, (normalizedDistance - 0.25) / 0.25);
+    // } else if (normalizedDistance < 0.75) {
+    //     color = mix(color3, color4, (normalizedDistance - 0.5) / 0.25);
+    // } else {
+    //     color = mix(color4, color5, (normalizedDistance - 0.75) / 0.25);
+    // }
 
     // Set the particle color
     gl_FragColor = vec4(color, 1.0);
