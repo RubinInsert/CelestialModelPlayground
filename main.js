@@ -13,7 +13,9 @@ document.getElementById('load-config').addEventListener('click', async () => {
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = await CelestialModel.createFromElectronConfig(electronConfig, 16);
+        currentElement = new CelestialModel(electronConfig, 16);
+        await currentElement.create();
+        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
     } else {
         console.error('Electron configuration input is empty.');
     }
@@ -47,6 +49,9 @@ window.addEventListener('resize', () => {
     ];
         currentElement = new CelestialModel("1s2 2s2 2p6 3s2 3p6 4s1 3d5", 16);
         await currentElement.create();
+        const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
+        SceneLoader.scene.add(boxHelper);
+        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
 })();
 const axesHelper = new THREE.AxesHelper(5);
 SceneLoader.scene.add(axesHelper);

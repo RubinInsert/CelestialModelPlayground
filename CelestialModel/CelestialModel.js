@@ -61,6 +61,9 @@ class CelestialModel {
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(electronConfig);
+        let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
+        this.boundingBox = new THREE.Box3(new THREE.Vector3(-maxDistance, -maxDistance, -maxDistance),
+                                         new THREE.Vector3(maxDistance, maxDistance, maxDistance));
     }
 
     static async init(scene, renderer) {

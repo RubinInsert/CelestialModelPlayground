@@ -35,5 +35,27 @@ const loader = new GLTFLoader();
 
 
 
+function fitCameraToBoundingBox(boundingBox) {
+    const boxSize = new THREE.Vector3();
+    boundingBox.getSize(boxSize);
+    const boxCenter = new THREE.Vector3();
+    boundingBox.getCenter(boxCenter);
 
-export { scene, camera, renderer, controls };
+    const maxDim = Math.max(boxSize.x, boxSize.y, boxSize.z);
+    const fov = camera.fov * (Math.PI / 180);
+    const distance = maxDim / (2 * Math.tan(fov / 2));
+
+    const direction = new THREE.Vector3();
+    camera.getWorldDirection(direction);
+    camera.position.copy(boxCenter.clone().sub(direction.multiplyScalar(distance * 1.2)));
+
+    camera.near = 0.1;
+    camera.far = distance * 3;
+    camera.updateProjectionMatrix();
+
+    if (controls) {
+        controls.target.copy(boxCenter);
+        controls.update();
+    }
+}
+export { scene, camera, renderer, controls, fitCameraToBoundingBox};
