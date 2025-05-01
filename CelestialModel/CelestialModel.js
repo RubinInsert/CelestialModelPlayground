@@ -97,6 +97,7 @@ class CelestialModel {
         const deltaTime = Math.min(CelestialModel.clock.getDelta(), 0.05); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
 
         for (let i = 0; i < CelestialModel.allRunningComputeShaders.length; i++) {
+            if(!CelestialModel.allRunningComputeShaders[i].material.visible) continue; // Skip if the material is not visible
             CelestialModel.allRunningComputeShaders[i].computeShader.compute();
             CelestialModel.allRunningComputeShaders[i].material.uniforms.texturePosition.value = CelestialModel.allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(CelestialModel.allRunningComputeShaders[i].positionVariable).texture;
             CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.deltaTime.value = deltaTime;
@@ -221,7 +222,7 @@ class CelestialModel {
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         const material = new THREE.ShaderMaterial({
             uniforms: {
-                atomicEmissionSpectrum: { value: CelestialModel.createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
+                atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
             },
@@ -240,44 +241,7 @@ class CelestialModel {
         }); // Store the GPUComputeRenderer for later use
         return { orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles };
     }
-    static wavelengthToRGB(wavelength) {
-        let R = 0, G = 0, B = 0;
-    
-        if (wavelength >= 380 && wavelength < 440) {
-            R = -(wavelength - 440) / (440 - 380);
-            G = 0.0;
-            B = 1.0;
-        } else if (wavelength >= 440 && wavelength < 490) {
-            R = 0.0;
-            G = (wavelength - 440) / (490 - 440);
-            B = 1.0;
-        } else if (wavelength >= 490 && wavelength < 510) {
-            R = 0.0;
-            G = 1.0;
-            B = -(wavelength - 510) / (510 - 490);
-        } else if (wavelength >= 510 && wavelength < 580) {
-            R = (wavelength - 510) / (580 - 510);
-            G = 1.0;
-            B = 0.0;
-        } else if (wavelength >= 580 && wavelength < 645) {
-            R = 1.0;
-            G = -(wavelength - 645) / (645 - 580);
-            B = 0.0;
-        } else if (wavelength >= 645 && wavelength <= 750) {
-            R = 1.0;
-            G = 0.0;
-            B = 0.0;
-        }
-    
-        // Adjust intensity for wavelengths near the edges of the visible spectrum
-        let factor = 1.0;    
-        R = Math.pow(R * factor, 0.8);
-        G = Math.pow(G * factor, 0.8);
-        B = Math.pow(B * factor, 0.8);
-        
-        return [R * 255, G * 255, B * 255]; // Return RGB values as an array
-    }
-    static hexToRgb(hex) {
+    static #hexToRgb(hex) {
         // Remove the '#' if it exists
         hex = hex.replace(/^#/, '');
     
@@ -288,12 +252,12 @@ class CelestialModel {
     
         return [r, g, b]; // Return as an array
     }
-    static createSpectrumTexture(wavelengths) {
-        const size = wavelengths.length;
+    static #createSpectrumTexture(rgbCodes) {
+        const size = rgbCodes.length;
         const data = new Uint8Array(size * 4); // RGB values for each wavelength
         // Map each wavelength to RGB and store in the texture data
-        wavelengths.forEach((wavelength, i) => {
-            const [R, G, B] = CelestialModel.hexToRgb(wavelength);
+        rgbCodes.forEach((rgbCode, i) => {
+            const [R, G, B] = CelestialModel.#hexToRgb(rgbCode);
             
             data[i * 4] = R;     // Red
             data[i * 4 + 1] = G; // Green
@@ -309,7 +273,7 @@ class CelestialModel {
         texture.needsUpdate = true; // Mark the texture as needing an update
         return texture;
     }
-    static visualizeTexture(texture, scene) {
+    static #visualizeTexture(texture, scene) { // This is for DEBUGGING ONLY - REMOVE LATER
         // Create a plane geometry
         const planeGeometry = new THREE.PlaneGeometry(2, 2); // Size of the plane
     
@@ -327,14 +291,14 @@ class CelestialModel {
         // Position the plane in front of the camera
         plane.position.set(0, 0, -2); // Adjust the Z position as needed
     }
-    static getEmissionSpectrum(elementName) {
+    static #getEmissionSpectrum(elementName) { // This is for DEBUGGING ONLY - REMOVE LATER
         const elementWaveLengths = CelestialModel.#emissionSpectrumData[elementName];
         if (!elementWaveLengths) {
             console.error(`No emission spectrum data found for element: ${elementName}`);
             return;
         }
-        let spectrumTexture = CelestialModel.createSpectrumTexture(elementWaveLengths);
-        CelestialModel.visualizeTexture(spectrumTexture, CelestialModel.scene);
+        let spectrumTexture = CelestialModel.#createSpectrumTexture(elementWaveLengths);
+        CelestialModel.#visualizeTexture(spectrumTexture, CelestialModel.scene);
     }
     async #createFromElectronConfig() {
         const individualOrbits = this.electronConfig.split(' ');
@@ -385,6 +349,7 @@ class CelestialModel {
         this.orbitals.forEach((orbit) => {
             orbit.particles.material.uniforms.maxDistance = { value: maxDistance };
         });
+        this.showTopTwoOrbitals(); // Show only the top two orbitals by default
     }
 
     async create() {
@@ -404,6 +369,37 @@ class CelestialModel {
         }
         });
         this.orbitals = [];
+    }
+    hideOrbital(index) {
+        if (this.orbitals[index]) {
+            this.orbitals[index].particles.visible = false;
+            CelestialModel.allRunningComputeShaders[index].material.visible = false;
+        } else {
+            console.error(`Orbital at index ${index} does not exist.`);
+        }
+    }
+    showOrbital(index) {
+        if (this.orbitals[index]) {
+            this.orbitals[index].particles.visible = true;
+            CelestialModel.allRunningComputeShaders[index].material.visible = true;
+        } else {
+            console.error(`Orbital at index ${index} does not exist.`);
+        }
+    }
+    showAllOrbitals() {
+        this.orbitals.forEach((orbit, index) => {
+            this.showOrbital(index);
+        });
+    }
+    showTopTwoOrbitals() {
+        this.orbitals.forEach((orbit, index) => {
+            if(orbit.orbitalLevel <= (this.highestOrbitalLevel - 2)) {
+                this.hideOrbital(index);
+            }
+            else {
+                this.showOrbital(index);
+            }
+        });
     }
 }
 export default CelestialModel;
