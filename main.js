@@ -100,7 +100,7 @@ function prototypeElementProtonField() {
     const ironGeometry = new THREE.SphereGeometry(40 - 5, 64, 64);
 const sphere1 = new THREE.Mesh(ironGeometry, createFresnelMaterial(0x00ced1)); // Dark Turquoise color
 SceneLoader.scene.add(sphere1);
-
+sphere1.visible = false; // Initially set to not visible
 const oxygenGeometry = new THREE.SphereGeometry(12, 64, 64);
 const sphere2 = new THREE.Mesh(oxygenGeometry, createFresnelMaterial(0xffa500));
 sphere2.visible = false; // Initially set to not visible
