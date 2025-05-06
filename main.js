@@ -6,7 +6,7 @@ import * as SceneLoader from './SceneLoader.js';
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Px, 1);
 const scaleFactor = 1;
 let currentElement = null;
-document.getElementById('load-config').addEventListener('click', async () => {
+document.getElementById('electron-config').addEventListener('change', async () => {
     const chemName = document.getElementById('electron-config').value.trim();
     if (chemName) {
         // Call createFromElectronConfig with the input value
@@ -15,6 +15,7 @@ document.getElementById('load-config').addEventListener('click', async () => {
         }
         currentElement = new CelestialModel(chemName, 16);
         await currentElement.create();
+        console.log(currentElement);
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
         document.getElementById('electron-config').value = ''; // Clear the input field after loading
     } else {
@@ -48,8 +49,9 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-        currentElement = new CelestialModel("Mo", 16);
+        currentElement = new CelestialModel("Fe", 16);
         await currentElement.create();
+        prototypeElementProtonField();
         console.log(currentElement);
         // const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
         // SceneLoader.scene.add(boxHelper);
@@ -57,3 +59,64 @@ window.addEventListener('resize', () => {
 })();
 // const axesHelper = new THREE.AxesHelper(5);
 // SceneLoader.scene.add(axesHelper);
+
+
+function prototypeElementProtonField() {
+    const createFresnelMaterial = (color) => {
+        return new THREE.ShaderMaterial({
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vWorldPosition;
+
+                void main() {
+                    vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz); // Transform normal to world space
+                    vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz; // Transform position to world space
+                    gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPosition, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uCameraPosition; // Camera position passed as a uniform
+                uniform vec3 uColor; // Color passed as a uniform
+                varying vec3 vNormal;
+                varying vec3 vWorldPosition;
+
+                void main() {
+                    vec3 cameraDirection = normalize(uCameraPosition - vWorldPosition); // Calculate direction to the camera
+                    float fresnel = pow(1.0 - abs(dot(normalize(vNormal), cameraDirection)), 3.0); // Fresnel effect (absolute value for both sides)
+
+                    vec3 color = mix(vec3(0.0, 0.0, 0.0), uColor, fresnel); // Use uColor for the gradient
+                    gl_FragColor = vec4(color, fresnel); // Use fresnel for opacity
+                }
+            `,
+            uniforms: {
+                uCameraPosition: { value: new THREE.Vector3() }, // Initialize the uniform
+                uColor: { value: new THREE.Color(color) }, // Pass the color as a uniform
+            },
+            transparent: true, // Enable transparency
+        });
+    };
+    
+    // Create two spheres
+    const ironGeometry = new THREE.SphereGeometry(40 - 5, 64, 64);
+const sphere1 = new THREE.Mesh(ironGeometry, createFresnelMaterial(0x00ced1)); // Dark Turquoise color
+SceneLoader.scene.add(sphere1);
+
+const oxygenGeometry = new THREE.SphereGeometry(12, 64, 64);
+const sphere2 = new THREE.Mesh(oxygenGeometry, createFresnelMaterial(0xffa500));
+sphere2.visible = false; // Initially set to not visible
+SceneLoader.scene.add(sphere2);
+SceneLoader.renderer.setAnimationLoop(() => {
+    sphere1.material.uniforms.uCameraPosition.value.copy(SceneLoader.camera.position);
+    sphere2.material.uniforms.uCameraPosition.value.copy(SceneLoader.camera.position);
+});
+sphere1.renderOrder = 999;
+sphere2.renderOrder = 1000; // Set render order to ensure correct rendering (Opacity)
+// Add event listeners for checkboxes
+document.getElementById('toggle-sphere-1').addEventListener('change', (event) => {
+    sphere1.visible = event.target.checked; // Toggle visibility of Sphere 1
+});
+
+document.getElementById('toggle-sphere-2').addEventListener('change', (event) => {
+    sphere2.visible = event.target.checked; // Toggle visibility of Sphere 2
+});
+}

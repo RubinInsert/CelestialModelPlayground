@@ -373,7 +373,7 @@ class CelestialModel {
     hideOrbital(index) {
         if (this.orbitals[index]) {
             this.orbitals[index].particles.visible = false;
-            CelestialModel.allRunningComputeShaders[index].material.visible = false;
+            CelestialModel.allRunningComputeShaders[index].material.visible = false; // The index of the compute shader matches the particle index as they are added at the same point in code
         } else {
             console.error(`Orbital at index ${index} does not exist.`);
         }
@@ -381,7 +381,7 @@ class CelestialModel {
     showOrbital(index) {
         if (this.orbitals[index]) {
             this.orbitals[index].particles.visible = true;
-            CelestialModel.allRunningComputeShaders[index].material.visible = true;
+            CelestialModel.allRunningComputeShaders[index].material.visible = true; // The index of the compute shader matches the particle index as they are added at the same point in code
         } else {
             console.error(`Orbital at index ${index} does not exist.`);
         }

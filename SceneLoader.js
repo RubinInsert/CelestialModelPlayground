@@ -4,9 +4,14 @@ import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 10000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-const light = new THREE.PointLight(0xffffff, 50, 100);
-light.position.set(10, 10, 10);
-scene.add(light);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 10, 7.5); // Set position of the directional light
+directionalLight.target.position.set(0, 0, 0); // Set the target to the origin
+scene.add(directionalLight);
+scene.add(directionalLight.target);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Add ambient light with lower intensity
+scene.add(ambientLight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
