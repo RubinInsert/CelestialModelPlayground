@@ -98,11 +98,21 @@ function prototypeElementProtonField() {
     
     // Create two spheres
     const ironGeometry = new THREE.SphereGeometry(40 - 5, 64, 64);
-const sphere1 = new THREE.Mesh(ironGeometry, createFresnelMaterial(0x00ced1)); // Dark Turquoise color
+    const ironMaterial = new THREE.MeshBasicMaterial({
+        color: 0x00ced1, // Dark Turquoise color
+        transparent: true,
+        opacity: 0.3, // Adjust opacity for transparency
+    });
+const sphere1 = new THREE.Mesh(ironGeometry, ironMaterial); // Dark Turquoise color
 SceneLoader.scene.add(sphere1);
 sphere1.visible = false; // Initially set to not visible
 const oxygenGeometry = new THREE.SphereGeometry(12, 64, 64);
-const sphere2 = new THREE.Mesh(oxygenGeometry, createFresnelMaterial(0xffa500));
+const oxygenMaterial = new THREE.MeshBasicMaterial({
+    color: 0xffa500, // Dark Turquoise color
+    transparent: true,
+    opacity: 0.3, // Adjust opacity for transparency
+});
+const sphere2 = new THREE.Mesh(oxygenGeometry, oxygenMaterial);
 sphere2.visible = false; // Initially set to not visible
 SceneLoader.scene.add(sphere2);
 SceneLoader.renderer.setAnimationLoop(() => {
