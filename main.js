@@ -13,7 +13,7 @@ document.getElementById('electron-config').addEventListener('change', async () =
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel(chemName, 16);
+        currentElement = new CelestialModel(chemName, 32);
         await currentElement.create();
         console.log(currentElement);
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
@@ -51,11 +51,11 @@ window.addEventListener('resize', () => {
     ];
         currentElement = new CelestialModel("Fe", 16);
         await currentElement.create();
+        currentElement.createOrbital(64, 'Px', 1);
         prototypeElementProtonField();
         console.log(currentElement);
         // const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
         // SceneLoader.scene.add(boxHelper);
-         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
 })();
 // const axesHelper = new THREE.AxesHelper(5);
 // SceneLoader.scene.add(axesHelper);
@@ -115,10 +115,6 @@ const oxygenMaterial = new THREE.MeshBasicMaterial({
 const sphere2 = new THREE.Mesh(oxygenGeometry, oxygenMaterial);
 sphere2.visible = false; // Initially set to not visible
 SceneLoader.scene.add(sphere2);
-SceneLoader.renderer.setAnimationLoop(() => {
-    sphere1.material.uniforms.uCameraPosition.value.copy(SceneLoader.camera.position);
-    sphere2.material.uniforms.uCameraPosition.value.copy(SceneLoader.camera.position);
-});
 sphere1.renderOrder = 999;
 sphere2.renderOrder = 1000; // Set render order to ensure correct rendering (Opacity)
 // Add event listeners for checkboxes

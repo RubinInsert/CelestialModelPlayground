@@ -94,13 +94,13 @@ class CelestialModel {
 
     static updateParticles() {
         if (!CelestialModel.isInitialized) return;
-        const deltaTime = Math.min(CelestialModel.clock.getDelta(), 0.05); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
+        const deltaTime = CelestialModel.clock.getElapsedTime(); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
 
         for (let i = 0; i < CelestialModel.allRunningComputeShaders.length; i++) {
             if(!CelestialModel.allRunningComputeShaders[i].material.visible) continue; // Skip if the material is not visible
             CelestialModel.allRunningComputeShaders[i].computeShader.compute();
             CelestialModel.allRunningComputeShaders[i].material.uniforms.texturePosition.value = CelestialModel.allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(CelestialModel.allRunningComputeShaders[i].positionVariable).texture;
-            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.deltaTime.value = deltaTime;
+            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.elapsedTime.value = deltaTime;
         }
     }
     static async #loadShader(url) {
@@ -159,7 +159,7 @@ class CelestialModel {
         return new THREE.Vector3(x, y, z);
     }
 
-    async #createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
+    async createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
         if (!CelestialModel.isInitialized) return false; // Ensure the module is initialized before creating an orbital
         const velocityShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
         const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
@@ -186,8 +186,8 @@ class CelestialModel {
             velocityTexture
         );
         velocityVariable.material.uniforms.threshold = { value: THRESHOLD };
-        positionVariable.material.uniforms.deltaTime = { value: 0.0 }; // Initialize deltaTime
-
+        positionVariable.material.uniforms.elapsedTime = { value: 0.0 }; // Initialize deltaTime
+        positionVariable.material.uniforms.resolution = { value: new THREE.Vector2(window.innerWidth, window.innerHeight) };
         // Set dependencies between variables
         gpuCompute.setVariableDependencies(positionVariable, [positionVariable, velocityVariable]);
         gpuCompute.setVariableDependencies(velocityVariable, [positionVariable, velocityVariable]);
@@ -230,7 +230,7 @@ class CelestialModel {
             fragmentShader: CelestialModel.#fragmentShaderCode,
             transparent: true,
         });
-
+        
         const particles = new THREE.Points(geometry, material);
         CelestialModel.scene.add(particles);
 
@@ -311,37 +311,37 @@ class CelestialModel {
             const orbitalElectronCount = parseInt(orbit.slice(2));
             let electronSqrtPerOrbital;
 
-            switch (orbitalType) {
-                case 'S':
-                    orbitalPromises.push(this.#createOrbital(this.sqrtElectronRatio, 'S', orbitalLevel));
-                    break;
-                case 'P':
-                    electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 3);
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Px', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Py', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Pz', orbitalLevel));
-                    break;
-                case 'D':
-                    electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 5);
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dxy', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dxz', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dyz', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dx2y2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dz2', orbitalLevel));
-                    break;
-                case 'F':
-                    electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 7);
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fxyz', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx_z2_minus_y2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy_z2_minus_x2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz_x2_minus_y2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy3', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx3', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz3', orbitalLevel));
-                    break;
-                default:
-                    console.error(`Unknown orbital type: ${orbitalType}`);
-            }
+            // switch (orbitalType) {
+            //     case 'S':
+            //         orbitalPromises.push(this.#createOrbital(this.sqrtElectronRatio, 'S', orbitalLevel));
+            //         break;
+            //     case 'P':
+            //         electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 3);
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Px', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Py', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Pz', orbitalLevel));
+            //         break;
+            //     case 'D':
+            //         electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 5);
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dxy', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dxz', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dyz', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dx2y2', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Dz2', orbitalLevel));
+            //         break;
+            //     case 'F':
+            //         electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 7);
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fxyz', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx_z2_minus_y2', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy_z2_minus_x2', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz_x2_minus_y2', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy3', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx3', orbitalLevel));
+            //         orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz3', orbitalLevel));
+            //         break;
+            //     default:
+            //         console.error(`Unknown orbital type: ${orbitalType}`);
+            // }
         });
 
         this.orbitals = await Promise.all(orbitalPromises);
