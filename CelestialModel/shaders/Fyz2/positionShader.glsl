@@ -1,5 +1,5 @@
 uniform float elapsedTime;
-
+uniform float timeStep;
 const float PI = 3.14159265359;
 const float a0 = 1.0; // Bohr radius
 float hash(vec2 p) {
@@ -71,7 +71,7 @@ void main() {
     vec2 seed =  uv * 100.0; // scale to increase randomness
 
     // SLOW TIME: only update every few seconds
-    float t = floor(elapsedTime * 5.0);
+    float t = floor(elapsedTime * timeStep);
     float t0 = floor(t);
     float t1 = t0 + 1.0;
     float mixVal = fract(t);

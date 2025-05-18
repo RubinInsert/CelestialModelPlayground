@@ -6,6 +6,7 @@ class CelestialModel {
     static scene = null;
     static camera = null;
     static renderer = null;
+    static timeStep = 5.0;
     static clock = new THREE.Clock();
     static allRunningComputeShaders = [];
     static OrbitalType = Object.freeze({
@@ -91,13 +92,14 @@ class CelestialModel {
 
     static updateParticles() {
         if (!CelestialModel.isInitialized) return;
-        const deltaTime = CelestialModel.clock.getElapsedTime(); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
+        const elapsedTime = CelestialModel.clock.getElapsedTime(); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
 
         for (let i = 0; i < CelestialModel.allRunningComputeShaders.length; i++) {
             if(!CelestialModel.allRunningComputeShaders[i].material.visible) continue; // Skip if the material is not visible
             CelestialModel.allRunningComputeShaders[i].computeShader.compute();
             CelestialModel.allRunningComputeShaders[i].material.uniforms.texturePosition.value = CelestialModel.allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(CelestialModel.allRunningComputeShaders[i].positionVariable).texture;
-            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.elapsedTime.value = deltaTime;
+            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.elapsedTime.value = elapsedTime;
+            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep }; // Incase user changes timeStep
         }
     }
     static async #loadShader(url) {
@@ -169,6 +171,7 @@ class CelestialModel {
             positionTexture
         );
         positionVariable.material.uniforms.elapsedTime = { value: 0.0 }; // Initialize deltaTime
+        positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep }; // Initialize deltaTime
         positionVariable.material.uniforms.resolution = { value: new THREE.Vector2(window.innerWidth, window.innerHeight) };
 
         // Initialize the GPU computation renderer
@@ -204,10 +207,9 @@ class CelestialModel {
                 atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
-                colour: { value: new THREE.Vector4(Math.random(), Math.random(), Math.random(), 1) }, // White color
             },
             vertexShader: CelestialModel.#vertexShaderCode,
-            fragmentShader: CelestialModel.#debugFragShader,
+            fragmentShader: CelestialModel.#fragmentShaderCode,
             transparent: true,
         });
         
@@ -325,7 +327,7 @@ class CelestialModel {
         });
 
         this.orbitals = await Promise.all(orbitalPromises);
-        const maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
+        const maxDistance = this.boundingBox.max.x; // Assuming the bounding box is symmetric
         this.orbitals.forEach((orbit) => {
             orbit.particles.material.uniforms.maxDistance = { value: maxDistance };
         });
