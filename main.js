@@ -13,14 +13,18 @@ document.getElementById('electron-config').addEventListener('change', async () =
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel(chemName, 32);
+        currentElement = new CelestialModel(chemName, 64);
         await currentElement.create();
+        document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
         console.log(currentElement);
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
         document.getElementById('electron-config').value = ''; // Clear the input field after loading
     } else {
         console.error('Electron configuration input is empty.');
     }
+});
+document.getElementById('timestep-slider').addEventListener('input', (event) => {
+    CelestialModel.timeStep = parseFloat(event.target.value);
 });
 function animate() {
     requestAnimationFrame(animate);
@@ -49,13 +53,13 @@ window.addEventListener('resize', () => {
         new THREE.Vector4(0, 1.0, 1.0, 1.0), // Cyan
         new THREE.Vector4(0.5, 0.5, 0.5, 1.0) // Gray
     ];
-        currentElement = new CelestialModel("Fe", 16);
+        currentElement = new CelestialModel("Fe", 64);
         await currentElement.create();
-        currentElement.createOrbital(64, 'Px', 1);
+        document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
+        SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
         prototypeElementProtonField();
         console.log(currentElement);
-        // const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow wireframe
-        // SceneLoader.scene.add(boxHelper);
+
 })();
 // const axesHelper = new THREE.AxesHelper(5);
 // SceneLoader.scene.add(axesHelper);

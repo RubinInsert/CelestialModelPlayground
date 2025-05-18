@@ -19,6 +19,7 @@
         }
       </script>
     <script type="module" src="main.js"></script>
+    <h1 style="position: absolute; font-family: monospace; display: inline;">Current Element: <div id="currentElementDisplay" style="display: inline;">Fe</div></h1>
     <div id="config-chooser-container">
       <input list="elements" id="electron-config" placeholder="He" />
       <datalist id="elements">
@@ -115,7 +116,20 @@
           <option value="Pa"></option>
           <option value="U"></option>
       </datalist>
-      <div id="sphere-toggles">
+      <div id="timestep-slider-container">
+        <label for="timestep-slider">Time Step:</label>
+        <input type="range" id="timestep-slider" min="0.01" max="10" step="0.01" value="5">
+        <span id="timestep-value">5</span>
+      </div>
+      <script>
+        const slider = document.getElementById('timestep-slider');
+        const valueDisplay = document.getElementById('timestep-value');
+        slider.addEventListener('input', () => {
+          valueDisplay.textContent = slider.value;
+          // You can dispatch a custom event or call your update function here
+        });
+      </script>
+      <!-- <div id="sphere-toggles">
         <label>
             <input type="checkbox" id="toggle-sphere-1">
             Toggle Fe Proton Sphere Example
@@ -124,7 +138,7 @@
             <input type="checkbox" id="toggle-sphere-2">
             Toggle O Proton Sphere Example
         </label>
-    </div>
+    </div> -->
     </div>
 </body>
 </html>
