@@ -3,7 +3,9 @@ uniform float timeStep;
 const float PI = 3.14159265359;
 const float a0 = 1.0; // Bohr radius
 float hash(vec2 p) {
-    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    p = fract(p * vec2(123.34, 456.21));
+    p += dot(p, p + 78.233);
+    return fract(p.x * p.y);
 }
 // Dz² Orbital ---------------------------------------------------------
 float R_1s(float r) {
