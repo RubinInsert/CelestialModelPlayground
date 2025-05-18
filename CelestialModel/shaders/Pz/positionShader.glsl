@@ -8,15 +8,15 @@ float hash(vec2 p) {
     return fract(p.x * p.y);
 }
 // Dz² Orbital ---------------------------------------------------------
-float R_1s(float r) {
-    return exp(-r / a0);
+float R_2p(float r) {
+    return r * exp(-r / (2.0 * a0));
 }
 
 // Angular part for dyz orbital:
 // Y_2,-1(θ, φ) ∝ sin(θ) * cos(θ) * sin(φ)
 // This corresponds to the d_yz orbital shape
-float Y_s() {
-    return 15.0; // Arbitrary constant to scale to the outer extremes of the lobes
+float Y_pz(float theta) {
+    return cos(theta) * 5.0;
 }
 
 
@@ -94,13 +94,13 @@ void main() {
     // Calculate spherical components
     float theta = acos(dir.z);
     float phi = atan(dir.y, dir.x);
-    float radial = R_1s(r);
-    float angular = Y_s();
+    float radial = R_2p(r);
+    float angular = Y_pz(theta);
     
     // Weight the lobes more heavily to balance the visualization
     //float boost = abs(angular) > 0.2 ? 1.5 : 1.0;
     float probDensity = radial * radial * angular * angular; //* boost;
-    if (probDensity < 0.5) discard; // or: if (U > probDensity) discard;
+    if (probDensity < 5.0) discard; // or: if (U > probDensity) discard;
     // Apply density to scale outward motion, with emphasis on the lobes
     float finalR = r * abs(probDensity);
     

@@ -3,21 +3,21 @@ uniform float timeStep;
 const float PI = 3.14159265359;
 const float a0 = 1.0; // Bohr radius
 float hash(vec2 p) {
-    p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 78.233);
-    return fract(p.x * p.y);
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
 }
 // Dz² Orbital ---------------------------------------------------------
-float R_1s(float r) {
-    return exp(-r / a0);
+float R_3d(float r) {
+    return r * r * exp(-r / (3.0 * a0));
 }
 
 // Angular part for dyz orbital:
 // Y_2,-1(θ, φ) ∝ sin(θ) * cos(θ) * sin(φ)
 // This corresponds to the d_yz orbital shape
-float Y_s() {
-    return 15.0; // Arbitrary constant to scale to the outer extremes of the lobes
+float Y_dxy(float theta, float phi) {
+    // Angular equation is multiplied by 0.5 to match the radial amplitude of the other similar orbitals
+    return 0.5 * sin(theta) * sin(theta) * sin(2.0 * phi);
 }
+
 
 
 vec3 randomDirection(vec2 seed) {
@@ -94,8 +94,8 @@ void main() {
     // Calculate spherical components
     float theta = acos(dir.z);
     float phi = atan(dir.y, dir.x);
-    float radial = R_1s(r);
-    float angular = Y_s();
+    float radial = R_3d(r);
+    float angular = Y_dxy(theta, phi);
     
     // Weight the lobes more heavily to balance the visualization
     //float boost = abs(angular) > 0.2 ? 1.5 : 1.0;

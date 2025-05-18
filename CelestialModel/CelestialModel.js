@@ -6,6 +6,7 @@ class CelestialModel {
     static scene = null;
     static camera = null;
     static renderer = null;
+    static timeStep = 5.0;
     static clock = new THREE.Clock();
     static allRunningComputeShaders = [];
     static OrbitalType = Object.freeze({
@@ -19,11 +20,11 @@ class CelestialModel {
         Dyz: 'Dyz', // TODO Alignments
         Dz2: 'Dz2', // TODO Alignments
         Fxyz: 'Fxyz', // TODO Alignments
-        Fx_z2_minus_y2: 'Fx_z2_minus_y2', // TODO Alignments
-        Fy_z2_minus_x2: 'Fy_z2_minus_x2', // TODO Alignments
+        Fx_x2_minus_3y2: 'Fx_x2_minus_3y2', // TODO Alignments
+        Fxz2: 'Fxz2', // TODO Alignments
         Fz_x2_minus_y2: 'Fz_x2_minus_y2', // TODO Alignments
         Fy3: 'Fy3', // TODO Alignments
-        Fx3: 'Fx3', // TODO Alignments
+        Fyz2: 'Fyz2', // TODO Alignments
         Fz3: 'Fz3', // TODO Alignments
     });
     static OrbitalScale = Object.freeze({
@@ -31,21 +32,20 @@ class CelestialModel {
         "Px": 1,
         "Py": 1,
         "Pz": 1,
-        "Dxy": 0.85,
-        "Dx2y2": 0.85,
-        "Dxz": 0.85,
-        "Dyz": 0.85,
+        "Dxy": 1,
+        "Dx2y2": 1,
+        "Dxz": 1,
+        "Dyz": 1,
         "Dz2": 1,
-        "Fxyz": 0.7,
-        "Fx_z2_minus_y2": 1,
-        "Fy_z2_minus_x2": 1,
+        "Fxyz": 1,
+        "Fx_x2_minus_3y2": 1,
+        "Fxz2": 1,
         "Fz_x2_minus_y2": 1,
-        "Fy3": 0.7,
-        "Fx3": 0.7,
-        "Fz3": 0.7,
+        "Fy3": 1,
+        "Fyz2": 1,
+        "Fz3": 1,
     });
     // Only get this code once in init function, reduce network requests
-    static #positionShaderCode = null;
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
@@ -63,7 +63,7 @@ class CelestialModel {
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
-        let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
+        let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 35.0;
         this.boundingBox = new THREE.Box3(new THREE.Vector3(-maxDistance, -maxDistance, -maxDistance),
                                          new THREE.Vector3(maxDistance, maxDistance, maxDistance));
     }
@@ -74,14 +74,12 @@ class CelestialModel {
 
         // Load shaders once for all instances
         [
-            CelestialModel.#positionShaderCode,
             CelestialModel.#vertexShaderCode,
             CelestialModel.#fragmentShaderCode,
             CelestialModel.#debugFragShader,
             CelestialModel.#emissionSpectrumData,
             CelestialModel.#electronConfigData,
         ] = await Promise.all([
-            CelestialModel.#loadShader('./shaders/positionShader.glsl'),
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
             CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
@@ -94,13 +92,14 @@ class CelestialModel {
 
     static updateParticles() {
         if (!CelestialModel.isInitialized) return;
-        const deltaTime = Math.min(CelestialModel.clock.getDelta(), 0.05); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
+        const elapsedTime = CelestialModel.clock.getElapsedTime(); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
 
         for (let i = 0; i < CelestialModel.allRunningComputeShaders.length; i++) {
             if(!CelestialModel.allRunningComputeShaders[i].material.visible) continue; // Skip if the material is not visible
             CelestialModel.allRunningComputeShaders[i].computeShader.compute();
             CelestialModel.allRunningComputeShaders[i].material.uniforms.texturePosition.value = CelestialModel.allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(CelestialModel.allRunningComputeShaders[i].positionVariable).texture;
-            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.deltaTime.value = deltaTime;
+            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.elapsedTime.value = elapsedTime;
+            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep }; // Incase user changes timeStep
         }
     }
     static async #loadShader(url) {
@@ -132,9 +131,8 @@ class CelestialModel {
         return highestOrbitalLevel;
     }
 
-    static #fillTextures(positionTexture, velocityTexture, orbitalLevel = 1) {
+    static #fillTextures(positionTexture, orbitalLevel = 1) {
         const posArray = positionTexture.image.data;
-        const velArray = velocityTexture.image.data;
 
         for (let i = 0; i < posArray.length; i += 4) {
             // Random positions
@@ -143,12 +141,6 @@ class CelestialModel {
             posArray[i + 1] = point.y; // y
             posArray[i + 2] = point.z; // z
             posArray[i + 3] = 1; // w (not used)
-
-            // Random velocities
-            velArray[i] = Math.random() * 2 - 1; // vx
-            velArray[i + 1] = Math.random() * 2 - 1; // vy
-            velArray[i + 2] = Math.random() * 2 - 1; // vz
-            velArray[i + 3] = 1; // w (not used)
         }
     }
 
@@ -161,36 +153,26 @@ class CelestialModel {
 
     async #createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
         if (!CelestialModel.isInitialized) return false; // Ensure the module is initialized before creating an orbital
-        const velocityShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
+        const positionShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/positionShader.glsl`);
         const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
         const gpuCompute = new GPUComputationRenderer(numParticlesSqrt, numParticlesSqrt, CelestialModel.renderer);
 
         // Create data textures for positions and velocities
         const positionTexture = gpuCompute.createTexture();
-        const velocityTexture = gpuCompute.createTexture();
 
         const THRESHOLD = 5 * 0.01; // Adjust threshold based on energy level
 
-        CelestialModel.#fillTextures(positionTexture, velocityTexture, orbitalLevel);
+        CelestialModel.#fillTextures(positionTexture, orbitalLevel);
 
-        // Add position and velocity variables to the Compute Shaders
+        // Add position variables to the Compute Shaders
         const positionVariable = gpuCompute.addVariable(
             'texturePosition',
-            CelestialModel.#positionShaderCode,
+            positionShaderCode,
             positionTexture
         );
-
-        const velocityVariable = gpuCompute.addVariable(
-            'textureVelocity',
-            velocityShaderCode,
-            velocityTexture
-        );
-        velocityVariable.material.uniforms.threshold = { value: THRESHOLD };
-        positionVariable.material.uniforms.deltaTime = { value: 0.0 }; // Initialize deltaTime
-
-        // Set dependencies between variables
-        gpuCompute.setVariableDependencies(positionVariable, [positionVariable, velocityVariable]);
-        gpuCompute.setVariableDependencies(velocityVariable, [positionVariable, velocityVariable]);
+        positionVariable.material.uniforms.elapsedTime = { value: 0.0 }; // Initialize deltaTime
+        positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep }; // Initialize deltaTime
+        positionVariable.material.uniforms.resolution = { value: new THREE.Vector2(window.innerWidth, window.innerHeight) };
 
         // Initialize the GPU computation renderer
         const error = gpuCompute.init();
@@ -230,7 +212,7 @@ class CelestialModel {
             fragmentShader: CelestialModel.#fragmentShaderCode,
             transparent: true,
         });
-
+        
         const particles = new THREE.Points(geometry, material);
         CelestialModel.scene.add(particles);
 
@@ -331,12 +313,12 @@ class CelestialModel {
                     break;
                 case 'F':
                     electronSqrtPerOrbital = Math.floor(this.sqrtElectronRatio * orbitalElectronCount / 7);
+                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx_x2_minus_3y2', orbitalLevel));
                     orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fxyz', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx_z2_minus_y2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy_z2_minus_x2', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz_x2_minus_y2', orbitalLevel));
+                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fxz2', orbitalLevel));
                     orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fy3', orbitalLevel));
-                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fx3', orbitalLevel));
+                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fyz2', orbitalLevel));
+                    orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz_x2_minus_y2', orbitalLevel));
                     orbitalPromises.push(this.#createOrbital(electronSqrtPerOrbital, 'Fz3', orbitalLevel));
                     break;
                 default:
@@ -345,7 +327,7 @@ class CelestialModel {
         });
 
         this.orbitals = await Promise.all(orbitalPromises);
-        const maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 2.5;
+        const maxDistance = this.boundingBox.max.x; // Assuming the bounding box is symmetric
         this.orbitals.forEach((orbit) => {
             orbit.particles.material.uniforms.maxDistance = { value: maxDistance };
         });

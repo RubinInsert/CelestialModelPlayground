@@ -9,7 +9,6 @@ directionalLight.position.set(5, 10, 7.5); // Set position of the directional li
 directionalLight.target.position.set(0, 0, 0); // Set the target to the origin
 scene.add(directionalLight);
 scene.add(directionalLight.target);
-
 const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Add ambient light with lower intensity
 scene.add(ambientLight);
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -20,7 +19,8 @@ controls.enableDamping = true; // Optional: for smoother controls
 controls.dampingFactor = 0.05;
 controls.update();
 camera.position.z = 5; // TODO: Calculate bounding box of Celestial models
-
+camera.near = 0.01;
+camera.far = 1000;
 const loader = new GLTFLoader();
 // loader.load('./modelTest2.glb', (gltf) => {
 //     const model = gltf.scene;
@@ -54,8 +54,8 @@ function fitCameraToBoundingBox(boundingBox) {
     camera.getWorldDirection(direction);
     camera.position.copy(boxCenter.clone().sub(direction.multiplyScalar(distance * 1.2)));
 
-    camera.near = 0.1;
-    camera.far = distance * 10;
+    camera.near = 0.01;
+    camera.far = distance * 40;
     camera.updateProjectionMatrix();
 
     if (controls) {
