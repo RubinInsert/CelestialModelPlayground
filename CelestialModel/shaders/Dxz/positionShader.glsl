@@ -7,35 +7,15 @@ float hash(vec2 p) {
 }
 // Dz² Orbital ---------------------------------------------------------
 float R_3d(float r) {
-    // Radial part of 3d orbital
     return r * r * exp(-r / (3.0 * a0));
 }
 
-float Y_20(float theta) {
-    // Angular part of Dz² (d₃z²-r²) orbital
-    return (3.0 * cos(theta) * cos(theta) - 1.0) * 0.5;
+// Angular part for dyz orbital:
+// Y_2,-1(θ, φ) ∝ sin(θ) * cos(θ) * sin(φ)
+// This corresponds to the d_yz orbital shape
+float Y_dxz(float theta, float phi) {
+    return sin(theta) * cos(theta) * cos(phi);
 }
-
-
-// ------------------------------
-// Radial part of 2p orbital (n=2, l=1)
-float R_2p(float r) {
-    return r * exp(-r / (2.0 * a0));
-}
-
-// Angular part of Px orbital (real part, proportional to spherical harmonic Y_{1,1} + Y_{1,-1})
-float Y_1px(float theta, float phi) {
-    return sin(theta) * cos(phi);
-}
-
-float Y_3fz3(float theta) {
-    float c = cos(theta);
-    return 0.25 * (5.0 * c * c * c - 3.0 * c); // scaled, normalization isn't vital for visuals
-}
-float R_4f(float r) {
-    return r*r*r * exp(-r / (4.0 * a0));
-}
-
 
 
 
@@ -114,12 +94,12 @@ void main() {
     float theta = acos(dir.z);
     float phi = atan(dir.y, dir.x);
     float radial = R_3d(r);
-    float angular = Y_20(theta);
+    float angular = Y_dxz(theta, phi);
     
     // Weight the lobes more heavily to balance the visualization
     //float boost = abs(angular) > 0.2 ? 1.5 : 1.0;
     float probDensity = radial * radial * angular * angular; //* boost;
-    if (probDensity < 5.0) discard; // or: if (U > probDensity) discard;
+    if (probDensity < 0.5) discard; // or: if (U > probDensity) discard;
     // Apply density to scale outward motion, with emphasis on the lobes
     float finalR = r * abs(probDensity);
     

@@ -33,8 +33,8 @@ class CelestialModel {
         "Pz": 1,
         "Dxy": 0.85,
         "Dx2y2": 0.85,
-        "Dxz": 0.85,
-        "Dyz": 0.85,
+        "Dxz": 1,
+        "Dyz": 1,
         "Dz2": 1,
         "Fxyz": 0.7,
         "Fx_z2_minus_y2": 1,
@@ -45,7 +45,6 @@ class CelestialModel {
         "Fz3": 0.7,
     });
     // Only get this code once in init function, reduce network requests
-    static #positionShaderCode = null;
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
@@ -74,14 +73,12 @@ class CelestialModel {
 
         // Load shaders once for all instances
         [
-            CelestialModel.#positionShaderCode,
             CelestialModel.#vertexShaderCode,
             CelestialModel.#fragmentShaderCode,
             CelestialModel.#debugFragShader,
             CelestialModel.#emissionSpectrumData,
             CelestialModel.#electronConfigData,
         ] = await Promise.all([
-            CelestialModel.#loadShader('./shaders/positionShader.glsl'),
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
             CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
@@ -132,9 +129,8 @@ class CelestialModel {
         return highestOrbitalLevel;
     }
 
-    static #fillTextures(positionTexture, velocityTexture, orbitalLevel = 1) {
+    static #fillTextures(positionTexture, orbitalLevel = 1) {
         const posArray = positionTexture.image.data;
-        const velArray = velocityTexture.image.data;
 
         for (let i = 0; i < posArray.length; i += 4) {
             // Random positions
@@ -143,12 +139,6 @@ class CelestialModel {
             posArray[i + 1] = point.y; // y
             posArray[i + 2] = point.z; // z
             posArray[i + 3] = 1; // w (not used)
-
-            // Random velocities
-            velArray[i] = Math.random() * 2 - 1; // vx
-            velArray[i + 1] = Math.random() * 2 - 1; // vy
-            velArray[i + 2] = Math.random() * 2 - 1; // vz
-            velArray[i + 3] = 1; // w (not used)
         }
     }
 
@@ -161,36 +151,25 @@ class CelestialModel {
 
     async createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
         if (!CelestialModel.isInitialized) return false; // Ensure the module is initialized before creating an orbital
-        const velocityShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/velocityShader.glsl`);
+        const positionShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/positionShader.glsl`);
         const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
         const gpuCompute = new GPUComputationRenderer(numParticlesSqrt, numParticlesSqrt, CelestialModel.renderer);
 
         // Create data textures for positions and velocities
         const positionTexture = gpuCompute.createTexture();
-        const velocityTexture = gpuCompute.createTexture();
 
         const THRESHOLD = 5 * 0.01; // Adjust threshold based on energy level
 
-        CelestialModel.#fillTextures(positionTexture, velocityTexture, orbitalLevel);
+        CelestialModel.#fillTextures(positionTexture, orbitalLevel);
 
-        // Add position and velocity variables to the Compute Shaders
+        // Add position variables to the Compute Shaders
         const positionVariable = gpuCompute.addVariable(
             'texturePosition',
-            CelestialModel.#positionShaderCode,
+            positionShaderCode,
             positionTexture
         );
-
-        const velocityVariable = gpuCompute.addVariable(
-            'textureVelocity',
-            velocityShaderCode,
-            velocityTexture
-        );
-        velocityVariable.material.uniforms.threshold = { value: THRESHOLD };
         positionVariable.material.uniforms.elapsedTime = { value: 0.0 }; // Initialize deltaTime
         positionVariable.material.uniforms.resolution = { value: new THREE.Vector2(window.innerWidth, window.innerHeight) };
-        // Set dependencies between variables
-        gpuCompute.setVariableDependencies(positionVariable, [positionVariable, velocityVariable]);
-        gpuCompute.setVariableDependencies(velocityVariable, [positionVariable, velocityVariable]);
 
         // Initialize the GPU computation renderer
         const error = gpuCompute.init();

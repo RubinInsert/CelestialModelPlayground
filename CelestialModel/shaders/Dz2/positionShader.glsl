@@ -13,7 +13,7 @@ float R_3d(float r) {
 
 float Y_20(float theta) {
     // Angular part of Dz² (d₃z²-r²) orbital
-    return (3.0 * cos(theta) * cos(theta) - 1.0) * 0.5;
+    return (3.0 * cos(theta) * cos(theta) - 1.0) * 0.5 * 0.5; // Scaled down to match angular amplitude of other D orbitals
 }
 
 
