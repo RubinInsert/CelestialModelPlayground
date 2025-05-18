@@ -15,6 +15,7 @@ document.getElementById('electron-config').addEventListener('change', async () =
         }
         currentElement = new CelestialModel(chemName, 64);
         await currentElement.create();
+        window.curE = currentElement;
         document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
         console.log(currentElement);
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
@@ -121,12 +122,4 @@ sphere2.visible = false; // Initially set to not visible
 SceneLoader.scene.add(sphere2);
 sphere1.renderOrder = 999;
 sphere2.renderOrder = 1000; // Set render order to ensure correct rendering (Opacity)
-// Add event listeners for checkboxes
-document.getElementById('toggle-sphere-1').addEventListener('change', (event) => {
-    sphere1.visible = event.target.checked; // Toggle visibility of Sphere 1
-});
-
-document.getElementById('toggle-sphere-2').addEventListener('change', (event) => {
-    sphere2.visible = event.target.checked; // Toggle visibility of Sphere 2
-});
 }

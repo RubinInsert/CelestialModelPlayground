@@ -63,9 +63,9 @@ class CelestialModel {
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
-        let maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 35.0;
-        this.boundingBox = new THREE.Box3(new THREE.Vector3(-maxDistance, -maxDistance, -maxDistance),
-                                         new THREE.Vector3(maxDistance, maxDistance, maxDistance));
+        this.maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 35.0;
+        this.boundingBox = new THREE.Box3(new THREE.Vector3(-this.maxDistance, -this.maxDistance, -this.maxDistance),
+                                         new THREE.Vector3(this.maxDistance, this.maxDistance, this.maxDistance));
     }
 
     static async init(scene, renderer) {
@@ -221,6 +221,7 @@ class CelestialModel {
             material: material,
             positionVariable: positionVariable,
         }); // Store the GPUComputeRenderer for later use
+        particles.material.uniforms.maxDistance = { value: this.maxDistance };
         return { orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles };
     }
     static #hexToRgb(hex) {
@@ -327,10 +328,9 @@ class CelestialModel {
         });
 
         this.orbitals = await Promise.all(orbitalPromises);
-        const maxDistance = this.boundingBox.max.x; // Assuming the bounding box is symmetric
-        this.orbitals.forEach((orbit) => {
-            orbit.particles.material.uniforms.maxDistance = { value: maxDistance };
-        });
+        // this.orbitals.forEach((orbit) => { // Replaced by setting directly in the createOrbital function
+        //     orbit.particles.material.uniforms.maxDistance = { value: this.maxDistance };
+        // });
         this.showTopTwoOrbitals(); // Show only the top two orbitals by default
     }
 
@@ -355,7 +355,7 @@ class CelestialModel {
     hideOrbital(index) {
         if (this.orbitals[index]) {
             this.orbitals[index].particles.visible = false;
-            CelestialModel.allRunningComputeShaders[index].material.visible = false; // The index of the compute shader matches the particle index as they are added at the same point in code
+            this.orbitals[index].particles.material.visible = false; // The index of the compute shader matches the particle index as they are added at the same point in code
         } else {
             console.error(`Orbital at index ${index} does not exist.`);
         }
@@ -363,7 +363,7 @@ class CelestialModel {
     showOrbital(index) {
         if (this.orbitals[index]) {
             this.orbitals[index].particles.visible = true;
-            CelestialModel.allRunningComputeShaders[index].material.visible = true; // The index of the compute shader matches the particle index as they are added at the same point in code
+            this.orbitals[index].particles.material.visible = true; // The index of the compute shader matches the particle index as they are added at the same point in code
         } else {
             console.error(`Orbital at index ${index} does not exist.`);
         }
