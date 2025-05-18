@@ -19,11 +19,11 @@ class CelestialModel {
         Dyz: 'Dyz', // TODO Alignments
         Dz2: 'Dz2', // TODO Alignments
         Fxyz: 'Fxyz', // TODO Alignments
-        Fx_z2_minus_y2: 'Fx_z2_minus_y2', // TODO Alignments
-        Fy_z2_minus_x2: 'Fy_z2_minus_x2', // TODO Alignments
+        Fx_x2_minus_3y2: 'Fx_x2_minus_3y2', // TODO Alignments
+        Fxz2: 'Fxz2', // TODO Alignments
         Fz_x2_minus_y2: 'Fz_x2_minus_y2', // TODO Alignments
         Fy3: 'Fy3', // TODO Alignments
-        Fx3: 'Fx3', // TODO Alignments
+        Fyz2: 'Fyz2', // TODO Alignments
         Fz3: 'Fz3', // TODO Alignments
     });
     static OrbitalScale = Object.freeze({
@@ -37,11 +37,11 @@ class CelestialModel {
         "Dyz": 1,
         "Dz2": 1,
         "Fxyz": 1,
-        "Fx_z2_minus_y2": 1,
-        "Fy_z2_minus_x2": 1,
+        "Fx_x2_minus_3y2": 1,
+        "Fxz2": 1,
         "Fz_x2_minus_y2": 1,
         "Fy3": 1,
-        "Fx3": 1,
+        "Fyz2": 1,
         "Fz3": 1,
     });
     // Only get this code once in init function, reduce network requests
@@ -204,9 +204,10 @@ class CelestialModel {
                 atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
+                colour: { value: new THREE.Vector4(Math.random(), Math.random(), Math.random(), 1) }, // White color
             },
             vertexShader: CelestialModel.#vertexShaderCode,
-            fragmentShader: CelestialModel.#fragmentShaderCode,
+            fragmentShader: CelestialModel.#debugFragShader,
             transparent: true,
         });
         
