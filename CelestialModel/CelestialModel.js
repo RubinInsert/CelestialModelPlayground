@@ -46,6 +46,24 @@ class CelestialModel {
         "Fyz2": 1,
         "Fz3": 1,
     });
+    static #orbitalShaderCode = { // Caching the shader codes on first load reduces network requests and speeds up rendering
+        "S": null,
+        "Px": null,
+        "Py": null,
+        "Pz": null,
+        "Dxy": null,
+        "Dx2y2": null,
+        "Dxz": null,
+        "Dyz": null,
+        "Dz2": null,
+        "Fxyz": null,
+        "Fx_x2_minus_3y2": null,
+        "Fxz2": null,
+        "Fz_x2_minus_y2": null,
+        "Fy3": null,
+        "Fyz2": null,
+        "Fz3": null,
+    }
     // Only get this code once in init function, reduce network requests
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
@@ -71,9 +89,6 @@ class CelestialModel {
                                        
         this.THREEObject = new THREE.Object3D();
         CelestialModel.scene.add(this.THREEObject);
-    }
-    static computeOrbitalScale(orbitalLevel) {
-
     }
     static async init(scene, renderer) {
         CelestialModel.scene = scene;
@@ -109,6 +124,14 @@ class CelestialModel {
     }
     static async #loadShader(url) {
         const response = await fetch(new URL(url, import.meta.url).href);
+        if (!response.ok) {
+            throw new Error(`Failed to load shader from ${new URL(url, import.meta.url).href}: ${response.statusText}`);
+        }
+        return await response.text();
+    }
+    static async #loadOrbitalShader(orbitalType) {
+        if(CelestialModel.#orbitalShaderCode[orbitalType] !== null) return CelestialModel.#orbitalShaderCode[orbitalType];
+        const response = await fetch(new URL(`./shaders/${orbitalType}/positionShader.glsl`, import.meta.url).href);
         if (!response.ok) {
             throw new Error(`Failed to load shader from ${new URL(url, import.meta.url).href}: ${response.statusText}`);
         }
@@ -158,7 +181,7 @@ class CelestialModel {
 
     async #createOrbital(numParticlesSqrt = 64, orbitalType = CelestialModel.OrbitalType.S, orbitalLevel = 1) {
         if (!CelestialModel.isInitialized) return false; // Ensure the module is initialized before creating an orbital
-        const positionShaderCode = await CelestialModel.#loadShader(`./shaders/${orbitalType}/positionShader.glsl`);
+        const positionShaderCode = await CelestialModel.#loadOrbitalShader(orbitalType);
         const PARTICLES = numParticlesSqrt * numParticlesSqrt; // Total number of particles in orbital
         const gpuCompute = new GPUComputationRenderer(numParticlesSqrt, numParticlesSqrt, CelestialModel.renderer);
 
@@ -350,17 +373,32 @@ class CelestialModel {
         return await this.#createFromElectronConfig(this.electronConfig, this.sqrtElectronRatio);
     }
     remove() {
-        this.orbitals.forEach((orbit) => {
+    // Remove all orbital particle systems and dispose resources
+    this.orbitals.forEach((orbit) => {
+        if (orbit.particles) {
             CelestialModel.scene.remove(orbit.particles);
-            orbit.particles.geometry.dispose();
-            orbit.particles.material.dispose();
-        // Dispose of textures in the material (if any)
-        if (orbit.particles.material.uniforms?.texturePosition?.value) {
-            orbit.particles.material.uniforms.texturePosition.value.dispose();
+            if (orbit.particles.geometry) orbit.particles.geometry.dispose();
+            if (orbit.particles.material) {
+                // Dispose textures in uniforms if present
+                if (orbit.particles.material.uniforms?.texturePosition?.value?.dispose) {
+                    orbit.particles.material.uniforms.texturePosition.value.dispose();
+                }
+                orbit.particles.material.dispose();
+            }
         }
-        });
-        this.orbitals = [];
+        // Remove from allRunningComputeShaders
+        const idx = CelestialModel.allRunningComputeShaders.findIndex(
+            s => s.material === orbit.particles.material
+        );
+        if (idx !== -1) CelestialModel.allRunningComputeShaders.splice(idx, 1);
+    });
+    this.orbitals = [];
+
+    // Remove the main THREEObject from the scene
+    if (this.THREEObject) {
+        CelestialModel.scene.remove(this.THREEObject);
     }
+}
     hideOrbital(index) {
         if (this.orbitals[index]) {
             this.orbitals[index].particles.visible = false;
