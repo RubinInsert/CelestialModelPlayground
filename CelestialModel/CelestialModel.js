@@ -51,6 +51,7 @@ class CelestialModel {
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
     static #elementData = null;
+    #scaleFactor = 1;
     constructor(chemSymbol = "H", sqrtElectronRatio = 32, ) {
         this.chemSymbol = chemSymbol.charAt(0).toUpperCase() + chemSymbol.slice(1).toLowerCase();
         if (!CelestialModel.isInitialized) {
@@ -63,11 +64,17 @@ class CelestialModel {
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
-        this.maxDistance = Math.pow(this.highestOrbitalLevel, 2) * 35.0;
+        this.#scaleFactor = CelestialModel.#elementData[this.chemSymbol].radius / (Math.pow(this.highestOrbitalLevel, 2)); // Used to scale the shader positions to the correct size internally
+        this.maxDistance =  Math.pow(this.highestOrbitalLevel, 2) * this.#scaleFactor;
         this.boundingBox = new THREE.Box3(new THREE.Vector3(-this.maxDistance, -this.maxDistance, -this.maxDistance),
                                          new THREE.Vector3(this.maxDistance, this.maxDistance, this.maxDistance));
+                                       
+        this.THREEObject = new THREE.Object3D();
+        CelestialModel.scene.add(this.THREEObject);
     }
+    static computeOrbitalScale(orbitalLevel) {
 
+    }
     static async init(scene, renderer) {
         CelestialModel.scene = scene;
         CelestialModel.renderer = renderer;
@@ -197,14 +204,14 @@ class CelestialModel {
 
             p += 3;
         }
-
+        console.log(Math.pow(orbitalLevel, 2) * this.#scaleFactor);
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#elementData[this.chemSymbol].emissionSpectra) },
                 texturePosition: { value: null },
-                scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
+                scale: { value: Math.pow(orbitalLevel, 2) * this.#scaleFactor / 41.0 }, // Dividing by 41.0 is necessary because the orbital 1s has a max distribution of 41 units (So we scale down to a unit sphere)
             },
             vertexShader: CelestialModel.#vertexShaderCode,
             fragmentShader: CelestialModel.#fragmentShaderCode,
@@ -220,6 +227,7 @@ class CelestialModel {
             positionVariable: positionVariable,
         }); // Store the GPUComputeRenderer for later use
         particles.material.uniforms.maxDistance = { value: this.maxDistance };
+        console.log("Current Element: " + this.maxDistance);
         return { orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles };
     }
     static #hexToRgb(hex) {
@@ -330,6 +338,9 @@ class CelestialModel {
         //     orbit.particles.material.uniforms.maxDistance = { value: this.maxDistance };
         // });
         this.showTopTwoOrbitals(); // Show only the top two orbitals by default
+        this.orbitals.forEach((orbit) => {
+            this.THREEObject.add(orbit.particles);
+        });
     }
 
     async create() {

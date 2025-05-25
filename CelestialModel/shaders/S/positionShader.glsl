@@ -8,7 +8,7 @@ float hash(vec2 p) {
     return fract(p.x * p.y);
 }
 // Dz² Orbital ---------------------------------------------------------
-float R_1s(float r) {
+float R_1s(float r) { 
     return exp(-r / a0);
 }
 
@@ -102,7 +102,7 @@ void main() {
     float probDensity = radial * radial * angular * angular; //* boost;
     if (probDensity < 0.5) discard; // or: if (U > probDensity) discard;
     // Apply density to scale outward motion, with emphasis on the lobes
-    float finalR = r * abs(probDensity);
+    float finalR = r * abs(probDensity); // Maxium "shader units" of 41"
     
     // Boost particles along z-axis (lobes)
     // if (abs(dir.z) > 0.8) {
