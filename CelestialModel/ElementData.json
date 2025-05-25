@@ -1,0 +1,930 @@
+{
+  "H": {
+    "electronConfig": "1s1",
+    "atomicRadius": 120,
+    "emissionSpectra": [
+      "#02b9ff",
+      "#b4001a"
+    ]
+  },
+  "He": {
+    "electronConfig": "1s2",
+    "atomicRadius": 140,
+    "emissionSpectra": [
+      "#000f6b",
+      "#00665a",
+      "#d3d300"
+    ]
+  },
+  "Li": {
+    "electronConfig": "1s2 2s1",
+    "atomicRadius": 182,
+    "emissionSpectra": [
+      "#000266",
+      "#004b49",
+      "#a31100",
+      "#f4cf00"
+    ]
+  },
+  "Be": {
+    "electronConfig": "1s2 2s2",
+    "atomicRadius": 153,
+    "emissionSpectra": [
+      "#110062",
+      "#0a56ff",
+      "#00a7a3",
+      "#005c23",
+      "#67000f"
+    ]
+  },
+  "B": {
+    "electronConfig": "1s2 2s2 2p1",
+    "atomicRadius": 192,
+    "emissionSpectra": [
+      "#11005a",
+      "#00546a",
+      "#4b7a00",
+      "#d3d300",
+      "#5e0007"
+    ]
+  },
+  "C": {
+    "electronConfig": "1s2 2s2 2p2",
+    "atomicRadius": 170,
+    "emissionSpectra": [
+      "#008373",
+      "#1e6100",
+      "#ff8000",
+      "#6d0005"
+    ]
+  },
+  "N": {
+    "electronConfig": "1s2 2s2 2p3",
+    "atomicRadius": 155,
+    "emissionSpectra": [
+      "#160071",
+      "#009f84",
+      "#369300",
+      "#e67b00",
+      "#c90100"
+    ]
+  },
+  "O": {
+    "electronConfig": "1s2 2s2 2p4",
+    "atomicRadius": 152,
+    "emissionSpectra": [
+      "#00a3a1",
+      "#489a00",
+      "#ec4a00",
+      "#930010"
+    ]
+  },
+  "F": {
+    "electronConfig": "1s2 2s2 2p5",
+    "atomicRadius": 135,
+    "emissionSpectra": [
+      "#00887d",
+      "#ecc100",
+      "#b32d00"
+    ]
+  },
+  "Ne": {
+    "electronConfig": "1s2 2s2 2p6",
+    "atomicRadius": 154,
+    "emissionSpectra": [
+      "#00350c",
+      "#ffb700",
+      "#ff4300",
+      "#de001c"
+    ]
+  },
+  "Na": {
+    "electronConfig": "1s2 2s2 2p6 3s1",
+    "atomicRadius": 227,
+    "emissionSpectra": [
+      "#f4c200"
+    ]
+  },
+  "Mg": {
+    "electronConfig": "1s2 2s2 2p6 3s2",
+    "atomicRadius": 173,
+    "emissionSpectra": [
+      "#001367",
+      "#00a561",
+      "#68000e"
+    ]
+  },
+  "Al": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p1",
+    "atomicRadius": 184,
+    "emissionSpectra": [
+      "#00b26c",
+      "#639f00",
+      "#ff4f00"
+    ]
+  },
+  "Si": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p2",
+    "atomicRadius": 210,
+    "emissionSpectra": [
+      "#09a7a7",
+      "#007a0d",
+      "#c9c900",
+      "#97001c"
+    ]
+  },
+  "P": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p3",
+    "atomicRadius": 180,
+    "emissionSpectra": [
+      "#001993",
+      "#00c879",
+      "#50be00",
+      "#a12500"
+    ]
+  },
+  "S": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p4",
+    "atomicRadius": 180,
+    "emissionSpectra": [
+      "#007972",
+      "#5d9300",
+      "#da1900",
+      "#960015"
+    ]
+  },
+  "Cl": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p5",
+    "atomicRadius": 175,
+    "emissionSpectra": [
+      "#005f76",
+      "#00c000",
+      "#daa100",
+      "#e00039"
+    ]
+  },
+  "Ar": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6",
+    "atomicRadius": 188,
+    "emissionSpectra": [
+      "#002f4f",
+      "#093800",
+      "#ff2e00",
+      "#59011c"
+    ]
+  },
+  "K": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s1",
+    "atomicRadius": 275,
+    "emissionSpectra": [
+      "#2100a7",
+      "#00a283",
+      "#00841a",
+      "#d3d300",
+      "#cc003a"
+    ]
+  },
+  "Ca": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2",
+    "atomicRadius": 231,
+    "emissionSpectra": [
+      "#170098",
+      "#0000f8",
+      "#5cc400",
+      "#ff4c00",
+      "#8d012b"
+    ]
+  },
+  "Sc": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d1",
+    "atomicRadius": 211,
+    "emissionSpectra": [
+      "#0a0068",
+      "#01a7a7",
+      "#80ab00",
+      "#c4s600",
+      "#840013"
+    ]
+  },
+  "Ti": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d2",
+    "atomicRadius": 187,
+    "emissionSpectra": [
+      "#170099",
+      "#01ffff",
+      "#067000",
+      "#f4bd00",
+      "#a50006"
+    ]
+  },
+  "V": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d3",
+    "atomicRadius": 179,
+    "emissionSpectra": [
+      "#0a00a2",
+      "#00bf28",
+      "#e4e400",
+      "#c50015"
+    ]
+  },
+  "Cr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s1 3d5",
+    "atomicRadius": 189,
+    "emissionSpectra": [
+      "#00087b",
+      "#008a41",
+      "#b3d500"
+    ]
+  },
+  "Mn": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d5",
+    "atomicRadius": 197,
+    "emissionSpectra": [
+      "#004fd9",
+      "#068d00",
+      "#e49e00",
+      "#91000f"
+    ]
+  },
+  "Fe": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d6",
+    "atomicRadius": 194,
+    "emissionSpectra": [
+      "#2526be",
+      "#00aeae",
+      "#11b800"
+    ]
+  },
+  "Co": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d7",
+    "atomicRadius": 192,
+    "emissionSpectra": [
+      "#00046e",
+      "#00b988",
+      "#b9ff00",
+      "#be1b00"
+    ]
+  },
+  "Ni": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d8",
+    "atomicRadius": 163,
+    "emissionSpectra": [
+      "#007f75",
+      "#c8e400",
+      "#a39e00",
+      "#7e0001"
+    ]
+  },
+  "Cu": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s1 3d10",
+    "atomicRadius": 140,
+    "emissionSpectra": [
+      "#14dcb8",
+      "#007728",
+      "#ddc700",
+      "#5a0005"
+    ]
+  },
+  "Zn": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10",
+    "atomicRadius": 139,
+    "emissionSpectra": [
+      "#094cb3",
+      "#0b8b8b",
+      "#003e22",
+      "#8b0400"
+    ]
+  },
+  "Ga": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p1",
+    "atomicRadius": 187,
+    "emissionSpectra": [
+      "#3200fa",
+      "#9a000a"
+    ]
+  },
+  "Ge": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p2",
+    "atomicRadius": 211,
+    "emissionSpectra": [
+      "#1b008d",
+      "#0058e6",
+      "#00a65d",
+      "#c9c900",
+      "#4b0009"
+    ]
+  },
+  "As": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p3",
+    "atomicRadius": 185,
+    "emissionSpectra": [
+      "#1200a1",
+      "#00517b",
+      "#009e29",
+      "#d35200",
+      "#51000a"
+    ]
+  },
+  "Se": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p4",
+    "atomicRadius": 190,
+    "emissionSpectra": [
+      "#05008a",
+      "#009893",
+      "#348a00",
+      "#890008"
+    ]
+  },
+  "Br": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p5",
+    "atomicRadius": 183,
+    "emissionSpectra": [
+      "#18007c",
+      "#00918c",
+      "#118c00",
+      "#902c00",
+      "#9e001f"
+    ]
+  },
+  "Kr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6",
+    "atomicRadius": 202,
+    "emissionSpectra": [
+      "#000875",
+      "#2d7d00",
+      "#cf8e00",
+      "#a60019"
+    ]
+  },
+  "Rb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1",
+    "atomicRadius": 303,
+    "emissionSpectra": [
+      "#140063",
+      "#af2200"
+    ]
+  },
+  "Sr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2",
+    "atomicRadius": 249,
+    "emissionSpectra": [
+      "#0073c0",
+      "#087d00",
+      "#983e00",
+      "#dc0b00"
+    ]
+  },
+  "Y": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d1",
+    "atomicRadius": 219,
+    "emissionSpectra": [
+      "#110052",
+      "#028b99",
+      "#16b300",
+      "#f46800",
+      "#720013"
+    ]
+  },
+  "Zr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d2",
+    "atomicRadius": 186,
+    "emissionSpectra": [
+      "#070067",
+      "#008bff",
+      "#00ab37",
+      "#c99300",
+      "#940017"
+    ]
+  },
+  "Nb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d4",
+    "atomicRadius": 207,
+    "emissionSpectra": [
+      "#2100aa",
+      "#00b18c",
+      "#2d9700",
+      "#d87500",
+      "#6f0016"
+    ]
+  },
+  "Mo": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d5",
+    "atomicRadius": 209,
+    "emissionSpectra": [
+      "#0022c9",
+      "#00ec2f",
+      "#ffc200",
+      "#950015"
+    ]
+  },
+  "Tc": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d5",
+    "atomicRadius": 209,
+    "emissionSpectra": [
+      "#058e99",
+      "#00541f",
+      "#894b00",
+      "#580009"
+    ]
+  },
+  "Ru": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d7",
+    "atomicRadius": 207,
+    "emissionSpectra": [
+      "#150069",
+      "#005370",
+      "#075f00",
+      "#994200",
+      "#5b000f"
+    ]
+  },
+  "Rh": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d8",
+    "atomicRadius": 195,
+    "emissionSpectra": [
+      "#001f97",
+      "#009c1c",
+      "#dc7c00",
+      "#79001a"
+    ]
+  },
+  "Pd": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 4d10",
+    "atomicRadius": 202,
+    "emissionSpectra": [
+      "#110054",
+      "#009c6b",
+      "#00540b",
+      "#7e97000",
+      "#39000d"
+    ]
+  },
+  "Ag": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d10",
+    "atomicRadius": 172,
+    "emissionSpectra": [
+      "#000657",
+      "#00401f",
+      "#069300"
+    ]
+  },
+  "Cd": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10",
+    "atomicRadius": 158,
+    "emissionSpectra": [
+      "#0054f6",
+      "#00b98b",
+      "#a40011"
+    ]
+  },
+  "In": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p1",
+    "atomicRadius": 193,
+    "emissionSpectra": [
+      "#000453",
+      "#4a2c00",
+      "#400010"
+    ]
+  },
+  "Sn": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p2",
+    "atomicRadius": 217,
+    "emissionSpectra": [
+      "#000045",
+      "#00282c",
+      "#c9c900",
+      "#9a0011"
+    ]
+  },
+  "Sb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p3",
+    "atomicRadius": 206,
+    "emissionSpectra": [
+      "#009659",
+      "#368d00",
+      "#ff8700",
+      "#ac0000"
+    ]
+  },
+  "Te": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p4",
+    "atomicRadius": 206,
+    "emissionSpectra": [
+      "#08bebe",
+      "#00aa20",
+      "#913e00",
+      "#4e008"
+    ]
+  },
+  "I": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p5",
+    "atomicRadius": 198,
+    "emissionSpectra": [
+      "#000370",
+      "#03aa00",
+      "#c4c500",
+      "#ad0009"
+    ]
+  },
+  "Xe": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6",
+    "atomicRadius": 216,
+    "emissionSpectra": [
+      "#130063",
+      "#0090b3",
+      "#00960c",
+      "#8e4c00",
+      "#9e0012"
+    ]
+  },
+  "Cs": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s1",
+    "atomicRadius": 343,
+    "emissionSpectra": [
+      "#000281",
+      "#143900",
+      "#590002"
+    ]
+  },
+  "Ba": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2",
+    "atomicRadius": 268,
+    "emissionSpectra": [
+      "#0092a9",
+      "#1d8b00",
+      "#c98f00"
+    ]
+  },
+  "La": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 5d1",
+    "atomicRadius": 240,
+    "emissionSpectra": [
+      "#0096a1",
+      "#00640f",
+      "#c98b00",
+      "#62000d"
+    ]
+  },
+  "Ce": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 5d1 4f1",
+    "atomicRadius": 235,
+    "emissionSpectra": [
+      "#160067",
+      "#0724dc",
+      "#20e47e",
+      "#fb8800",
+      "#c70400"
+    ]
+  },
+  "Pr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f3",
+    "atomicRadius": 239,
+    "emissionSpectra": [
+      "#1c1fdc",
+      "#00ad94",
+      "#c58300",
+      "#74000e"
+    ]
+  },
+  "Nd": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f4",
+    "atomicRadius": 229,
+    "emissionSpectra": [
+      "#1534c9",
+      "#008f1d",
+      "#bea000",
+      "#6a0b00"
+    ]
+  },
+  "Pm": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f5",
+    "atomicRadius": 236,
+    "emissionSpectra": [
+      "#13005f",
+      "#0049c5",
+      "#4dbf00",
+      "#ba5c00",
+      "#a70022"
+    ]
+  },
+  "Sm": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f6",
+    "atomicRadius": 229,
+    "emissionSpectra": [
+      "#2500bc",
+      "#02c9c9",
+      "#b5e400",
+      "#d55000",
+      "#940011"
+    ]
+  },
+  "Eu": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f7",
+    "atomicRadius": 233,
+    "emissionSpectra": [
+      "#0a00d8",
+      "#00d58b",
+      "#5cdc00",
+      "#ff8f00",
+      "#9e0017"
+    ]
+  },
+  "Gd": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f7 5d1",
+    "atomicRadius": 237,
+    "emissionSpectra": [
+      "#1a009e",
+      "#00b9bb",
+      "#087d00",
+      "#ffb600",
+      "#6c001e"
+    ]
+  },
+  "Tb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f9",
+    "atomicRadius": 221,
+    "emissionSpectra": [
+      "#19007c",
+      "#00b691",
+      "#0a9900",
+      "#fbdf00",
+      "#d30013"
+    ]
+  },
+  "Dy": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f10",
+    "atomicRadius": 229,
+    "emissionSpectra": [
+      "#0400b0",
+      "#00a0bf",
+      "#00be06",
+      "#ff6000",
+      "#9d001a"
+    ]
+  },
+  "Ho": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f11",
+    "atomicRadius": 216,
+    "emissionSpectra": [
+      "#1a0089",
+      "#00a378",
+      "#038000",
+      "#c25c00",
+      "#810016"
+    ]
+  },
+  "Er": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f12",
+    "atomicRadius": 235,
+    "emissionSpectra": [
+      "#0f006d",
+      "#00fffe",
+      "#2ee400",
+      "#f97600",
+      "#7d0007"
+    ]
+  },
+  "Tm": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f13",
+    "atomicRadius": 227,
+    "emissionSpectra": [
+      "#00eedc",
+      "#54d300",
+      "#a44800",
+      "#94007"
+    ]
+  },
+  "Yb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14",
+    "atomicRadius": 242,
+    "emissionSpectra": [
+      "#0146be",
+      "#006919",
+      "#be9c00",
+      "#6c0014"
+    ]
+  },
+  "Lu": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d1",
+    "atomicRadius": 221,
+    "emissionSpectra": [
+      "#00070",
+      "#00c37b",
+      "#cfdc00",
+      "#7e2c00",
+      "#610003"
+    ]
+  },
+  "Hf": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d2",
+    "atomicRadius": 212,
+    "emissionSpectra": [
+      "#19008d",
+      "#00d292",
+      "#d2c500",
+      "#b53600",
+      "#580013"
+    ]
+  },
+    "Ta": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d3",
+    "atomicRadius": 217,
+    "emissionSpectra": [
+      "#1a0083",
+      "#00a680",
+      "#00dd1f",
+      "#ec7e00",
+      "#dc0400"
+    ]
+  },
+  "W": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d4",
+    "atomicRadius": 210,
+    "emissionSpectra": [
+      "#000688",
+      "#02ecec",
+      "#31b300",
+      "#8e0005"
+    ]
+  },
+  "Re": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d5",
+    "atomicRadius": 217,
+    "emissionSpectra": [
+      "#15006b",
+      "#1151fb",
+      "#006319",
+      "#594800",
+      "#820009"
+    ]
+  },
+  "Os": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d6",
+    "atomicRadius": 216,
+    "emissionSpectra": [
+      "#170073",
+      "#00b1a9",
+      "#009e0d",
+      "#cf4e00",
+      "#97000e"
+    ]
+  },
+  "Ir": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d7",
+    "atomicRadius": 202,
+    "emissionSpectra": [
+      "#0000bf",
+      "#00958a",
+      "#2da000",
+      "#860019"
+    ]
+  },
+  "Pt": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s1 4f14 5d9",
+    "atomicRadius": 209,
+    "emissionSpectra": [
+      "#00ad9f",
+      "#023b00",
+      "#e7af00",
+      "#780007"
+    ]
+  },
+  "Au": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s1 4f14 5d10",
+    "atomicRadius": 166,
+    "emissionSpectra": [
+      "#140069",
+      "#16b3b3",
+      "#00612d",
+      "#d3a200",
+      "#840006"
+    ]
+  },
+  "Hg": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10",
+    "atomicRadius": 209,
+    "emissionSpectra": [
+      "#0a006a",
+      "#004255",
+      "#01bc00",
+      "#b9a300"
+    ]
+  },
+  "Tl": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p1",
+    "atomicRadius": 196,
+    "emissionSpectra": [
+      "#82c909",
+      "#a2dc05"
+    ]
+  },
+  "Pb": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p2",
+    "atomicRadius": 202,
+    "emissionSpectra": [
+      "#190089",
+      "#00a162",
+      "#72d500",
+      "#f47500",
+      "#830018"
+    ]
+  },
+  "Bi": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p3",
+    "atomicRadius": 207,
+    "emissionSpectra": [
+      "#16006a",
+      "#0029fe",
+      "#002e17",
+      "#3cb700",
+      "#400300"
+    ]
+  },
+  "Po": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p4",
+    "atomicRadius": 197,
+    "emissionSpectra": [
+      "#dcecec",
+      "#01008d",
+      "#169928",
+      "#7c7a00"
+    ]
+  },
+  "At": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p5",
+    "atomicRadius": 202,
+    "emissionSpectra": [
+      "#ffffff"
+    ]
+  },
+  "Rn": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6",
+    "atomicRadius": 220,
+    "emissionSpectra": [
+      "#14005f",
+      "#dc6300",
+      "#740327"
+    ]
+  },
+  "Fr": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s1",
+    "atomicRadius": 348,
+    "emissionSpectra": [
+      "#1400a5",
+      "#006a18",
+      "#406400",
+      "#e4b200",
+      "#be0b00"
+    ]
+  },
+  "Ra": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2",
+    "atomicRadius": 283,
+    "emissionSpectra": [
+      "#0012bf",
+      "#009812",
+      "#d37200",
+      "#940017"
+    ]
+  },
+  "Ac": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 6d1",
+    "atomicRadius": 260,
+    "emissionSpectra": [
+      "#120056",
+      "#0546dc",
+      "#ffdc00",
+      "#4e0002"
+    ]
+  },
+  "Th": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 6d2",
+    "atomicRadius": 237,
+    "emissionSpectra": [
+      "#120052",
+      "#00abac",
+      "#783400",
+      "#dd8500",
+      "#e41400"
+    ]
+  },
+  "Pa": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 5f2 6d1",
+    "atomicRadius": 243,
+    "emissionSpectra": [
+      "#2600d5",
+      "#ae000e"
+    ]
+  },
+  "U": {
+    "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s2 4d10 5p6 6s2 4f14 5d10 6p6 7s2 5f3 6d1",
+    "atomicRadius": 240,
+    "emissionSpectra": [
+      "#1600722",
+      "#01e4e4",
+      "#7ddb00",
+      "#f48700",
+      "#9f000f"
+    ]
+  }
+}

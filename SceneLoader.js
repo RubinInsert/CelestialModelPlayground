@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/examples/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/postprocessing/OutputPass.js';
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.01, 10000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -13,6 +16,7 @@ const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Add ambient light
 scene.add(ambientLight);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ReinhardToneMapping;
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true; // Optional: for smoother controls
@@ -21,24 +25,18 @@ controls.update();
 camera.position.z = 5; // TODO: Calculate bounding box of Celestial models
 camera.near = 0.01;
 camera.far = 1000;
-const loader = new GLTFLoader();
-// loader.load('./modelTest2.glb', (gltf) => {
-//     const model = gltf.scene;
-//     scene.add(model);
-//     // Scale the model down to 0.1
-//     model.scale.set(1, 1, 1);
-//     // Compute the bounding box of the model
-//     // Make the model transparent
-//     model.traverse((child) => {
-//         if (child.isMesh) {
-//             child.material.transparent = true;
-//             child.material.opacity = 0.5;
-//         }
-//     });
 
-// });
+const renderScene = new RenderPass(scene, camera);
+// const bloomPass = new UnrealBloomPass(
+//   new THREE.Vector2(window.innerWidth, window.innerHeight),
+//   0.1, // strength
+//   0.01, // radius
+//   0.00 // threshold
+// );
 
-
+const composer = new EffectComposer(renderer);
+// composer.addPass(renderScene);
+// composer.addPass(bloomPass);
 
 function fitCameraToBoundingBox(boundingBox) {
     const boxSize = new THREE.Vector3();
@@ -63,4 +61,4 @@ function fitCameraToBoundingBox(boundingBox) {
         controls.update();
     }
 }
-export { scene, camera, renderer, controls, fitCameraToBoundingBox};
+export { scene, camera, renderer, controls, fitCameraToBoundingBox, composer};

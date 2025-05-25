@@ -32,6 +32,7 @@ function animate() {
     CelestialModel.updateParticles();
     SceneLoader.renderer.render(SceneLoader.scene, SceneLoader.camera);
     SceneLoader.controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
+    SceneLoader.composer.render();
 }
 
 animate();
@@ -58,12 +59,14 @@ window.addEventListener('resize', () => {
         await currentElement.create();
         document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
-        prototypeElementProtonField();
         console.log(currentElement);
+        const axesHelper = new THREE.AxesHelper(5);
+SceneLoader.scene.add(axesHelper);
+        axesHelper.position.set(currentElement.maxDistance, 0, 0); // Set position of the axes helper
+        //currentElement.remove();
 
 })();
-// const axesHelper = new THREE.AxesHelper(5);
-// SceneLoader.scene.add(axesHelper);
+
 
 
 function prototypeElementProtonField() {

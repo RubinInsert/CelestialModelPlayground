@@ -1,3 +1,4 @@
+//if(typeof window==="object"&&!window.require)window.require=()=>window.THREE;
 import * as THREE from 'three';
 import { GPUComputationRenderer } from 'three/examples/misc/GPUComputationRenderer.js';
 
@@ -49,17 +50,16 @@ class CelestialModel {
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
-    static #emissionSpectrumData = null;
-    static #electronConfigData = null;
+    static #elementData = null;
     constructor(chemSymbol = "H", sqrtElectronRatio = 32, ) {
         this.chemSymbol = chemSymbol.charAt(0).toUpperCase() + chemSymbol.slice(1).toLowerCase();
         if (!CelestialModel.isInitialized) {
             throw new Error("CelestialModel.init() must be called before creating instances.");
         }
-        if (!CelestialModel.#electronConfigData[this.chemSymbol]) {
+        if (!CelestialModel.#elementData[this.chemSymbol]) {
             throw new Error(`Invalid chemical symbol.`);
         }
-        this.electronConfig = CelestialModel.#electronConfigData[this.chemSymbol];
+        this.electronConfig = CelestialModel.#elementData[this.chemSymbol].electronConfig;
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
@@ -77,14 +77,12 @@ class CelestialModel {
             CelestialModel.#vertexShaderCode,
             CelestialModel.#fragmentShaderCode,
             CelestialModel.#debugFragShader,
-            CelestialModel.#emissionSpectrumData,
-            CelestialModel.#electronConfigData,
+            CelestialModel.#elementData,
         ] = await Promise.all([
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
             CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
-            CelestialModel.#loadJSON('./EmissionSpectra.json'),
-            CelestialModel.#loadJSON('./ElectronConfig.json'),
+            CelestialModel.#loadJSON('./ElementData.json'),
         ]);
 
         CelestialModel.isInitialized = true;
@@ -204,7 +202,7 @@ class CelestialModel {
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         const material = new THREE.ShaderMaterial({
             uniforms: {
-                atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#emissionSpectrumData[this.chemSymbol]) },
+                atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#elementData[this.chemSymbol].emissionSpectra) },
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * CelestialModel.OrbitalScale[orbitalType] },
             },
@@ -275,7 +273,7 @@ class CelestialModel {
         plane.position.set(0, 0, -2); // Adjust the Z position as needed
     }
     static #getEmissionSpectrum(elementName) { // This is for DEBUGGING ONLY - REMOVE LATER
-        const elementWaveLengths = CelestialModel.#emissionSpectrumData[elementName];
+        const elementWaveLengths = CelestialModel.#elementData[elementName].emissionSpectra;
         if (!elementWaveLengths) {
             console.error(`No emission spectrum data found for element: ${elementName}`);
             return;
