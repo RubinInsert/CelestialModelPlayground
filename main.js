@@ -7,6 +7,7 @@ import * as SceneLoader from './SceneLoader.js';
 const scaleFactor = 1;
 let currentElement = null;
 document.getElementById('electron-config').addEventListener('change', async () => {
+    
     const chemName = document.getElementById('electron-config').value.trim();
     if (chemName) {
         // Call createFromElectronConfig with the input value
@@ -16,6 +17,7 @@ document.getElementById('electron-config').addEventListener('change', async () =
         currentElement = new CelestialModel(chemName, 64);
         await currentElement.create();
         window.curE = currentElement;
+        console.log('Scene objects:', SceneLoader.scene.children);
         document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
         console.log(currentElement);
         //SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
@@ -23,9 +25,18 @@ document.getElementById('electron-config').addEventListener('change', async () =
     } else {
         console.error('Electron configuration input is empty.');
     }
+    if(document.getElementById("enable-proton-fields").checked) {
+        currentElement.setProtonFieldVisibility(true);
+    }
 });
 document.getElementById('timestep-slider').addEventListener('input', (event) => {
     CelestialModel.timeStep = parseFloat(event.target.value);
+});
+document.getElementById('enable-proton-fields').addEventListener('change', (event) => {
+    const isChecked = event.target.checked;
+    if (currentElement) {
+        currentElement.setProtonFieldVisibility(isChecked);
+    }
 });
 function animate() {
     requestAnimationFrame(animate);
@@ -34,7 +45,7 @@ function animate() {
     SceneLoader.controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
 }
 
-animate();
+
 
 window.addEventListener('resize', () => {
     SceneLoader.camera.aspect = window.innerWidth / window.innerHeight;
@@ -43,22 +54,25 @@ window.addEventListener('resize', () => {
 });
 (async () => {
     await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
-        let auxilaryElement = new CelestialModel("H", 64);
-        await auxilaryElement.create();
+    animate();
+        // let auxilaryElement = new CelestialModel("H", 64);
+        // await auxilaryElement.create();
 //         // Bounding box
 // //         const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow color
 // // SceneLoader.scene.add(boxHelper);
 
 
-         auxilaryElement.THREEObject.position.set(5, 0, 0);
+        //  auxilaryElement.THREEObject.position.set(5, 0, 0);
          currentElement = new CelestialModel("Fe", 64);
          await currentElement.create();
+         window.currentObject = currentElement.THREEObject;
+         currentElement.setSpinState(1.0);
         document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
 //         SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
 //         console.log(currentElement);
 //         const axesHelper = new THREE.AxesHelper(5);
 // SceneLoader.scene.add(axesHelper);
-        axesHelper.position.set(currentElement.maxDistance, 0, 0); // Set position of the axes helper
+        //axesHelper.position.set(currentElement.maxDistance, 0, 0); // Set position of the axes helper
 
 })();
 
@@ -101,11 +115,6 @@ function prototypeElementProtonField() {
     
     // Create two spheres
     const ironGeometry = new THREE.SphereGeometry(40 - 5, 64, 64);
-    const ironMaterial = new THREE.MeshBasicMaterial({
-        color: 0x00ced1, // Dark Turquoise color
-        transparent: true,
-        opacity: 0.3, // Adjust opacity for transparency
-    });
 const sphere1 = new THREE.Mesh(ironGeometry, ironMaterial); // Dark Turquoise color
 SceneLoader.scene.add(sphere1);
 sphere1.visible = false; // Initially set to not visible

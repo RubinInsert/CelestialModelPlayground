@@ -19,11 +19,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ReinhardToneMapping;
 document.body.appendChild(renderer.domElement);
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(2.5, 0, 0);
+controls.target.set(0, 0, 0);
 controls.enableDamping = true; // Optional: for smoother controls
 controls.dampingFactor = 0.05;
 controls.update();
-camera.position.set(2.5, 0, 10); // TODO: Calculate bounding box of Celestial models
+camera.position.set(0, 0, 10); // TODO: Calculate bounding box of Celestial models
 camera.near = 0.01;
 camera.far = 1000;
 

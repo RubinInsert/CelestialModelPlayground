@@ -9,44 +9,26 @@ class CelestialModel {
     static renderer = null;
     static timeStep = 5.0;
     static clock = new THREE.Clock();
-    static allRunningComputeShaders = [];
+    static allModels = [];
     static OrbitalType = Object.freeze({
         S: 'S',
         Px: 'Px',
         Py: 'Py',
         Pz: 'Pz',
-        Dxy: 'Dxy', // TODO Alignments
-        Dx2y2: 'Dx2y2', // TODO Alignments
-        Dxz: 'Dxz', // TODO Alignments\
-        Dyz: 'Dyz', // TODO Alignments
-        Dz2: 'Dz2', // TODO Alignments
-        Fxyz: 'Fxyz', // TODO Alignments
-        Fx_x2_minus_3y2: 'Fx_x2_minus_3y2', // TODO Alignments
-        Fxz2: 'Fxz2', // TODO Alignments
-        Fz_x2_minus_y2: 'Fz_x2_minus_y2', // TODO Alignments
-        Fy3: 'Fy3', // TODO Alignments
-        Fyz2: 'Fyz2', // TODO Alignments
-        Fz3: 'Fz3', // TODO Alignments
+        Dxy: 'Dxy', 
+        Dx2y2: 'Dx2y2', 
+        Dxz: 'Dxz', 
+        Dyz: 'Dyz', 
+        Dz2: 'Dz2', 
+        Fxyz: 'Fxyz', 
+        Fx_x2_minus_3y2: 'Fx_x2_minus_3y2',
+        Fxz2: 'Fxz2', 
+        Fz_x2_minus_y2: 'Fz_x2_minus_y2', 
+        Fy3: 'Fy3', 
+        Fyz2: 'Fyz2', 
+        Fz3: 'Fz3', 
     });
-    static OrbitalScale = Object.freeze({
-        "S": 1,
-        "Px": 1,
-        "Py": 1,
-        "Pz": 1,
-        "Dxy": 1,
-        "Dx2y2": 1,
-        "Dxz": 1,
-        "Dyz": 1,
-        "Dz2": 1,
-        "Fxyz": 1,
-        "Fx_x2_minus_3y2": 1,
-        "Fxz2": 1,
-        "Fz_x2_minus_y2": 1,
-        "Fy3": 1,
-        "Fyz2": 1,
-        "Fz3": 1,
-    });
-    static #orbitalShaderCode = { // Caching the shader codes on first load reduces network requests and speeds up rendering
+    static #orbitalShaderCode = { // Caching the shader codes on first load reduces network requests and speeds up rendering - TO BE REPLACED WITH A SINGLE SHADER POSSIBLY
         "S": null,
         "Px": null,
         "Py": null,
@@ -79,6 +61,7 @@ class CelestialModel {
             throw new Error(`Invalid chemical symbol.`);
         }
         this.electronConfig = CelestialModel.#elementData[this.chemSymbol].electronConfig;
+        this.protonFieldRadius = CelestialModel.#elementData[this.chemSymbol].protonFieldRadius ?? null;
         this.sqrtElectronRatio = sqrtElectronRatio;
         this.orbitals = [];
         this.highestOrbitalLevel = CelestialModel.#getHighestOrbitalLevel(this.electronConfig);
@@ -86,8 +69,12 @@ class CelestialModel {
         this.maxDistance =  Math.pow(this.highestOrbitalLevel, 2) * this.#scaleFactor;
         this.boundingBox = new THREE.Box3(new THREE.Vector3(-this.maxDistance, -this.maxDistance, -this.maxDistance),
                                          new THREE.Vector3(this.maxDistance, this.maxDistance, this.maxDistance));
+        this.spinState = 0.0;
                                        
         this.THREEObject = new THREE.Object3D();
+        this.computeShaders = [];
+        this.protonField = this.#createProtonField();
+        CelestialModel.allModels.push(this);
         CelestialModel.scene.add(this.THREEObject);
     }
     static async init(scene, renderer) {
@@ -109,17 +96,33 @@ class CelestialModel {
 
         CelestialModel.isInitialized = true;
     }
-
     static updateParticles() {
-        if (!CelestialModel.isInitialized) return;
-        const elapsedTime = CelestialModel.clock.getElapsedTime(); // Call once per frame - limit to 0.05 seconds per frame to avoid large time steps when tab is inactive
+        if (!CelestialModel.isInitialized) {
+            throw new Error("CelestialModel.init() must be called before using this method.");
+        }
+        CelestialModel.allModels.forEach(model => model.update());
+    }
+    update() {
+    if (!CelestialModel.isInitialized) return;
+    const elapsedTime = CelestialModel.clock.getElapsedTime();
+    // Fade towards chosen spin state (For when the user changes the state)
+    if (Math.abs(this.spinState - this.#targetSpinState) > 0.01) {
+        const direction = Math.sign(this.#targetSpinState - this.spinState);
+        this.spinState += direction * 0.01;
+        this.spinState = Math.max(-1.0, Math.min(1.0, this.spinState)); // Clamp
+    } else {
+        this.spinState = this.#targetSpinState; // Snap to target when close enough
+    }
 
-        for (let i = 0; i < CelestialModel.allRunningComputeShaders.length; i++) {
-            if(!CelestialModel.allRunningComputeShaders[i].material.visible) continue; // Skip if the material is not visible
-            CelestialModel.allRunningComputeShaders[i].computeShader.compute();
-            CelestialModel.allRunningComputeShaders[i].material.uniforms.texturePosition.value = CelestialModel.allRunningComputeShaders[i].computeShader.getCurrentRenderTarget(CelestialModel.allRunningComputeShaders[i].positionVariable).texture;
-            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.elapsedTime.value = elapsedTime;
-            CelestialModel.allRunningComputeShaders[i].positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep }; // Incase user changes timeStep
+        for (const shaderData of this.computeShaders) {
+            if (!shaderData.material.visible) continue;
+            shaderData.computeShader.compute();
+            shaderData.material.uniforms.texturePosition.value = shaderData.computeShader.getCurrentRenderTarget(shaderData.positionVariable).texture;
+            shaderData.positionVariable.material.uniforms.elapsedTime.value = elapsedTime;
+            shaderData.positionVariable.material.uniforms.timeStep = { value: CelestialModel.timeStep };
+            if (shaderData.material.uniforms.mode) {
+                shaderData.material.uniforms.mode.value = this.spinState;
+            }
         }
     }
     static async #loadShader(url) {
@@ -227,14 +230,15 @@ class CelestialModel {
 
             p += 3;
         }
-        console.log(Math.pow(orbitalLevel, 2) * this.#scaleFactor);
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
         geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 atomicEmissionSpectrum: { value: CelestialModel.#createSpectrumTexture(CelestialModel.#elementData[this.chemSymbol].emissionSpectra) },
                 texturePosition: { value: null },
-                scale: { value: Math.pow(orbitalLevel, 2) * this.#scaleFactor / 41.0 }, // Dividing by 41.0 is necessary because the orbital 1s has a max distribution of 41 units (So we scale down to a unit sphere)
+                scale: { value: Math.pow(orbitalLevel, 2) * this.#scaleFactor / 41.0 }, // Dividing by 41.0 is necessary because the orbital 1s has a max distribution of 41 units - Simply due to how I created the shader (So we scale down to a unit sphere)
+                mode: { value: 0.0}, // 0.0 for normal emission mode, 1.0 for negative spin state, 2.0 for positive spin state
+                pointSize: { value: 2.0 },
             },
             vertexShader: CelestialModel.#vertexShaderCode,
             fragmentShader: CelestialModel.#fragmentShaderCode,
@@ -242,15 +246,14 @@ class CelestialModel {
         });
         
         const particles = new THREE.Points(geometry, material);
-        CelestialModel.scene.add(particles);
+        this.THREEObject.add(particles);
 
-        CelestialModel.allRunningComputeShaders.push({
+        this.computeShaders.push({
             computeShader: gpuCompute,
             material: material,
             positionVariable: positionVariable,
         }); // Store the GPUComputeRenderer for later use
         particles.material.uniforms.maxDistance = { value: this.maxDistance };
-        console.log("Current Element: " + this.maxDistance);
         return { orbitalType: orbitalType, orbitalLevel: orbitalLevel, particles: particles };
     }
     static #hexToRgb(hex) {
@@ -284,6 +287,24 @@ class CelestialModel {
         texture.magFilter = THREE.LinearFilter;
         texture.needsUpdate = true; // Mark the texture as needing an update
         return texture;
+    }
+    #createProtonField() {
+        if (!this.protonFieldRadius) {
+            console.warn(`No proton field radius defined for ${this.chemSymbol}. Proton field will not be created.`);
+        }
+        const protonFieldGeometry = new THREE.SphereGeometry(this.protonFieldRadius, 64, 64);
+        const protonFieldMaterial = new THREE.MeshBasicMaterial({
+            color: CelestialModel.#elementData[this.chemSymbol].emissionSpectra.at(-1), // Default to red if no color is defined
+            transparent: true,
+            opacity: 0.5,
+            depthWrite: false
+        });
+        const protonField = new THREE.Mesh(protonFieldGeometry, protonFieldMaterial);
+        protonField.name = `${this.chemSymbol} Proton Field`;
+        protonField.visible = false; // Initially set to not visible
+        this.THREEObject.add(protonField);
+        return protonField;
+        
     }
     static #visualizeTexture(texture, scene) { // This is for DEBUGGING ONLY - REMOVE LATER
         // Create a plane geometry
@@ -370,34 +391,27 @@ class CelestialModel {
         if (!CelestialModel.isInitialized) {
             throw new Error("CelestialModel.init() must be called before using this method.");
         }
+        this.#createProtonField();
         return await this.#createFromElectronConfig(this.electronConfig, this.sqrtElectronRatio);
     }
     remove() {
     // Remove all orbital particle systems and dispose resources
-    this.orbitals.forEach((orbit) => {
-        if (orbit.particles) {
-            CelestialModel.scene.remove(orbit.particles);
-            if (orbit.particles.geometry) orbit.particles.geometry.dispose();
-            if (orbit.particles.material) {
-                // Dispose textures in uniforms if present
-                if (orbit.particles.material.uniforms?.texturePosition?.value?.dispose) {
-                    orbit.particles.material.uniforms.texturePosition.value.dispose();
-                }
-                orbit.particles.material.dispose();
+    this.THREEObject.traverse((child) => {
+        console.log(child);
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+            if (Array.isArray(child.material)) {
+            child.material.forEach(mat => mat.dispose());
+            } else {
+            child.material.dispose();
             }
+            child.visible = false; // Hide the material
         }
-        // Remove from allRunningComputeShaders
-        const idx = CelestialModel.allRunningComputeShaders.findIndex(
-            s => s.material === orbit.particles.material
-        );
-        if (idx !== -1) CelestialModel.allRunningComputeShaders.splice(idx, 1);
     });
+    console.log(this.THREEObject.children);
+    CelestialModel.scene.remove(this.THREEObject);
     this.orbitals = [];
-
     // Remove the main THREEObject from the scene
-    if (this.THREEObject) {
-        CelestialModel.scene.remove(this.THREEObject);
-    }
 }
     hideOrbital(index) {
         if (this.orbitals[index]) {
@@ -429,6 +443,19 @@ class CelestialModel {
                 this.showOrbital(index);
             }
         });
+    }
+    setProtonFieldVisibility(visible) {
+        if (!this.protonField) {
+            console.warn(`No proton field defined for ${this.chemSymbol}. Cannot set visibility.`);
+            return;
+        }
+        this.protonField.visible = visible;
+    }
+    #targetSpinState = 0.0;
+    // This function is used to set the spin state of the element: 0 = no visualisation, 1 = negative spin state, 2 = positive spin state
+    setSpinState(value) {
+        // Set targetMode to -1 (red), 0 (off), or 1 (blue)
+        this.#targetSpinState = Math.max(-1.0, Math.min(1.0, value));
     }
 }
 export default CelestialModel;

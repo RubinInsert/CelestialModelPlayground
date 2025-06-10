@@ -121,6 +121,12 @@
         <input type="range" id="timestep-slider" min="0.01" max="10" step="0.01" value="5">
         <span id="timestep-value">5</span>
       </div>
+      <div id="proton-fields-toggle">
+        <label>
+          <input type="checkbox" id="enable-proton-fields">
+          Enable Proton Fields
+        </label>
+      </div>
       <script>
         const slider = document.getElementById('timestep-slider');
         const valueDisplay = document.getElementById('timestep-value');

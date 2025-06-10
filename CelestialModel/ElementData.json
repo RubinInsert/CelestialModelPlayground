@@ -2,6 +2,7 @@
   "H": {
     "electronConfig": "1s1",
     "radius": 0.5292,
+    "protonFieldRadius": 0.908,
     "emissionSpectra": [
       "#02b9ff",
       "#b4001a"
@@ -10,6 +11,7 @@
   "He": {
     "electronConfig": "1s2",
     "radius": 0.3113,
+    "protonFieldRadius": 0.311,
     "emissionSpectra": [
       "#000f6b",
       "#00665a",
@@ -19,6 +21,7 @@
   "Li": {
     "electronConfig": "1s2 2s1",
     "radius": 1.6282,
+    "protonFieldRadius": 1.4,
     "emissionSpectra": [
       "#000266",
       "#004b49",
@@ -29,6 +32,7 @@
   "Be": {
     "electronConfig": "1s2 2s2",
     "radius": 1.0855,
+    "protonFieldRadius": 0.812,
     "emissionSpectra": [
       "#110062",
       "#0a56ff",
@@ -40,6 +44,7 @@
   "B": {
     "electronConfig": "1s2 2s2 2p1",
     "radius": 0.8141,
+    "protonFieldRadius": 0.514,
     "emissionSpectra": [
       "#11005a",
       "#00546a",
@@ -61,6 +66,7 @@
   "N": {
     "electronConfig": "1s2 2s2 2p3",
     "radius": 0.5427,
+    "protonFieldRadius": 0.895,
     "emissionSpectra": [
       "#160071",
       "#009f84",
@@ -72,6 +78,7 @@
   "O": {
     "electronConfig": "1s2 2s2 2p4",
     "radius": 0.4652,
+    "protonFieldRadius": 0.840,
     "emissionSpectra": [
       "#00a3a1",
       "#489a00",
@@ -82,6 +89,7 @@
   "F": {
     "electronConfig": "1s2 2s2 2p5",
     "radius": 0.4071,
+    "protonFieldRadius": 0.804,
     "emissionSpectra": [
       "#00887d",
       "#ecc100",
@@ -91,6 +99,7 @@
   "Ne": {
     "electronConfig": "1s2 2s2 2p6",
     "radius": 0.3618,
+    "protonFieldRadius": 0.362,
     "emissionSpectra": [
       "#00350c",
       "#ffb700",
@@ -249,6 +258,7 @@
   "Fe": {
     "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d6",
     "radius": 2.0885,
+    "protonFieldRadius": 1.31,
     "emissionSpectra": [
       "#2526be",
       "#00aeae",
@@ -349,6 +359,7 @@
   "Kr": {
     "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6",
     "radius": 0.9493,
+    "protonFieldRadius": 0.9493,
     "emissionSpectra": [
       "#000875",
       "#2d7d00",
@@ -410,6 +421,7 @@
   "Mo": {
     "electronConfig": "1s2 2s2 2p6 3s2 3p6 4s2 3d10 4p6 5s1 4d5",
     "radius": 3.0677,
+    "protonFieldRadius": 2.11,
     "emissionSpectra": [
       "#0022c9",
       "#00ec2f",

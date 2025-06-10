@@ -1,6 +1,6 @@
 uniform sampler2D texturePosition;
 uniform float scale;
-
+uniform float pointSize;
 varying vec2 vUv;
 varying vec3 vPosition; // Declare vPosition to pass to the fragment shader
 
@@ -18,5 +18,5 @@ void main() {
 
     // Set the final position
     gl_Position = projectionMatrix * modelViewMatrix * vec4(scaledPosition, 1.0);
-    gl_PointSize = 3.0;
+    gl_PointSize = pointSize;
 }
