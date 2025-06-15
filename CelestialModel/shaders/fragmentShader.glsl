@@ -1,6 +1,6 @@
 uniform sampler2D atomicEmissionSpectrum;
 uniform float maxDistance; // Add maxDistance as a uniform
-
+uniform float spinStateFadeFactor; // Controls how much normal particles fade out when visualising spin state
 // UNIFORMS FOR VISUALISING SPIN STATE ------------
 uniform float mode;       // -1.0 (blue), 0.0 (off), 1.0 (red)
 //-------------------------------------------------
@@ -20,6 +20,6 @@ void main() {
 
     float alpha = (vPosition == vec3(0.0)) ? 0.0 : 1.0;
 
-    gl_FragColor = vec4(neutral, alpha);
+    gl_FragColor = vec4(neutral * spinStateFadeFactor, alpha);
 
 }

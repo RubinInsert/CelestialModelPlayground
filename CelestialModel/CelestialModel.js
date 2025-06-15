@@ -8,6 +8,7 @@ class CelestialModel {
     static camera = null;
     static renderer = null;
     static timeStep = 5.0;
+    static spinStateFadeFactor = 0.25;
     static clock = new THREE.Clock();
     static allModels = [];
     static OrbitalType = Object.freeze({
@@ -50,6 +51,7 @@ class CelestialModel {
     static #vertexShaderCode = null;
     static #fragmentShaderCode = null;
     static #debugFragShader = null;
+    static #spinStateFragShaderCode = null;
     static #elementData = null;
     #scaleFactor = 1;
     constructor(chemSymbol = "H", sqrtElectronRatio = 32, ) {
@@ -74,6 +76,7 @@ class CelestialModel {
         this.THREEObject = new THREE.Object3D();
         this.computeShaders = [];
         this.protonField = this.#createProtonField();
+        this.spinStateColor = Math.random() < 0.5 ? new THREE.Color(0x0000ff) : new THREE.Color(0xff0000); // Randomly choose blue or red
         CelestialModel.allModels.push(this);
         CelestialModel.scene.add(this.THREEObject);
     }
@@ -85,12 +88,12 @@ class CelestialModel {
         [
             CelestialModel.#vertexShaderCode,
             CelestialModel.#fragmentShaderCode,
-            CelestialModel.#debugFragShader,
+            CelestialModel.#spinStateFragShaderCode,
             CelestialModel.#elementData,
         ] = await Promise.all([
             CelestialModel.#loadShader('./shaders/vertexShader.glsl'),
             CelestialModel.#loadShader('./shaders/fragmentShader.glsl'),
-            CelestialModel.#loadShader('./shaders/debugFragShader.glsl'),
+            CelestialModel.#loadShader('./shaders/SPINSTATE_fragmentShader.glsl'),
             CelestialModel.#loadJSON('./ElementData.json'),
         ]);
 
@@ -238,6 +241,7 @@ class CelestialModel {
                 texturePosition: { value: null },
                 scale: { value: Math.pow(orbitalLevel, 2) * this.#scaleFactor / 41.0 }, // Dividing by 41.0 is necessary because the orbital 1s has a max distribution of 41 units - Simply due to how I created the shader (So we scale down to a unit sphere)
                 mode: { value: 0.0}, // 0.0 for normal emission mode, 1.0 for negative spin state, 2.0 for positive spin state
+                spinStateFadeFactor: { value: 1.0 }, // Used to fade the spin state color
                 pointSize: { value: 2.0 },
             },
             vertexShader: CelestialModel.#vertexShaderCode,
@@ -444,12 +448,115 @@ class CelestialModel {
             }
         });
     }
+    getTopTwoOrbitals() {
+        return this.orbitals.filter(orbit => orbit.orbitalLevel >= (this.highestOrbitalLevel - 2));
+    }
     setProtonFieldVisibility(visible) {
         if (!this.protonField) {
             console.warn(`No proton field defined for ${this.chemSymbol}. Cannot set visibility.`);
             return;
         }
         this.protonField.visible = visible;
+    }
+    setSpinStateVisualization(isEnabled) {
+        const unpairedElectronsInfo = this.getUnpairedElectrons();
+        if (unpairedElectronsInfo.totalUnpaired === 0) return; // No unpaired electrons, no need to visualize spin state
+        unpairedElectronsInfo.unpairedOrbitals.forEach(orbit => {
+            const orbitalObjects = this.getOrbitals(orbit.type, orbit.level);
+            if(isEnabled) {            
+                orbitalObjects.forEach(orbitObject => {
+                    if (orbitObject.particles && orbitObject.particles.material) {
+                        console.log(orbit.probabilityUnpaired)
+                        orbitObject.particles.material.fragmentShader = CelestialModel.#spinStateFragShaderCode;
+                        orbitObject.particles.material.uniforms.spinStateColor = { value: this.spinStateColor };
+                        orbitObject.particles.material.uniforms.spinStateRatio = { value: orbit.probabilityUnpaired };
+                        orbitObject.particles.material.needsUpdate = true;
+
+                    }
+                });
+                this.orbitals.forEach(orbit => {
+                    if (orbit.particles && orbit.particles.material) {
+                        orbit.particles.material.uniforms.spinStateFadeFactor = { value: CelestialModel.spinStateFadeFactor }; // Set all paired particles to a faded/muted color.
+                        orbit.particles.material.needsUpdate = true;
+                    }
+                });
+            } else {
+                orbitalObjects.forEach(orbitObject => {
+                    if (orbitObject.particles && orbitObject.particles.material) {
+                        orbitObject.particles.material.fragmentShader = CelestialModel.#fragmentShaderCode;
+                        orbitObject.particles.material.needsUpdate = true;
+                    }
+                });
+                this.orbitals.forEach(orbit => {
+                    if (orbit.particles && orbit.particles.material) {
+                        orbit.particles.material.uniforms.spinStateFadeFactor = { value: 1.0 }; // Set the faded particles back to normal color.
+                        orbit.particles.material.needsUpdate = true;
+                    }
+                });
+            }
+        });
+
+        
+    }
+    // Returns an array of orbitals which fit the orbitalType and orbitalLevel
+    getOrbitals(orbitalType, orbitalLevel) {
+        orbitalType = orbitalType.toUpperCase(); // Ensure the orbital type is uppercase
+        return this.orbitals.filter(orbit =>
+            orbit.orbitalLevel === orbitalLevel &&
+            (
+                orbit.orbitalType === orbitalType ||
+                (
+                    // For "P", match Px, Py, Pz; for "D", match Dxy, Dxz, Dyz, Dx2y2, Dz2; for "F", match all F* orbitals
+                    (orbitalType === "S" && orbit.orbitalType === "S") ||
+                    (orbitalType === "P" && ["Px", "Py", "Pz"].includes(orbit.orbitalType)) ||
+                    (orbitalType === "D" && ["Dxy", "Dxz", "Dyz", "Dx2y2", "Dz2"].includes(orbit.orbitalType)) ||
+                    (orbitalType === "F" && orbit.orbitalType.startsWith("F"))
+                )
+            )
+        );
+    }
+    getUnpairedElectrons() {
+        // Maximum electrons per orbital type
+        const maxElectrons = { s: 2, p: 6, d: 10, f: 14 };
+        // Number of suborbitals per type
+        const suborbitals = { s: 1, p: 3, d: 5, f: 7 };
+
+        // Parse the string into [level, type, count]
+        const orbitals = this.electronConfig.match(/\d+[spdf]\d+/g)
+            .map(str => {
+                const [, level, type, count] = str.match(/(\d+)([spdf])(\d+)/);
+                return { level: parseInt(level), type, count: parseInt(count) };
+            });
+
+        let unpaired = [];
+        orbitals.forEach(({ level, type, count }) => {
+            const nSub = suborbitals[type];
+            // Fill each suborbital with 1 before pairing (Hund's rule)
+            let pairs = Math.floor(count / 2);
+            let unpairedInThis = count % 2 === 0 ? 0 : 1;
+            // For p, d, f, unpaired = suborbitals - pairs if not fully filled
+            if (count < maxElectrons[type]) {
+                // Distribute electrons singly first, then pair
+                if (count <= nSub) {
+                    unpairedInThis = count;
+                } else {
+                    unpairedInThis = nSub - (count - nSub);
+                }
+            } else {
+                unpairedInThis = 0;
+            }
+            if (unpairedInThis > 0) {
+                unpaired.push({ level,
+                                type,
+                                unpaired: unpairedInThis,
+                                probabilityUnpaired: count === 0 ? 0 : unpairedInThis / count });
+            }
+        });
+        const totalUnpaired = unpaired.reduce((sum, u) => sum + u.unpaired, 0);
+        return {
+            totalUnpaired,
+            unpairedOrbitals: unpaired,
+        };
     }
     #targetSpinState = 0.0;
     // This function is used to set the spin state of the element: 0 = no visualisation, 1 = negative spin state, 2 = positive spin state
