@@ -76,7 +76,6 @@ class CelestialModel {
         this.THREEObject = new THREE.Object3D();
         this.computeShaders = [];
         this.protonField = this.#createProtonField();
-        this.spinStateColor = Math.random() < 0.5 ? new THREE.Color(0x0000ff) : new THREE.Color(0xff0000); // Randomly choose blue or red
         CelestialModel.allModels.push(this);
         CelestialModel.scene.add(this.THREEObject);
     }
@@ -462,13 +461,14 @@ class CelestialModel {
         const unpairedElectronsInfo = this.getUnpairedElectrons();
         if (unpairedElectronsInfo.totalUnpaired === 0) return; // No unpaired electrons, no need to visualize spin state
         unpairedElectronsInfo.unpairedOrbitals.forEach(orbit => {
+            let spinStateColor = Math.random() < 0.5 ? new THREE.Color(0x0000ff) : new THREE.Color(0xff0000); // Randomly choose blue or red
             const orbitalObjects = this.getOrbitals(orbit.type, orbit.level);
             if(isEnabled) {            
                 orbitalObjects.forEach(orbitObject => {
                     if (orbitObject.particles && orbitObject.particles.material) {
                         console.log(orbit.probabilityUnpaired)
                         orbitObject.particles.material.fragmentShader = CelestialModel.#spinStateFragShaderCode;
-                        orbitObject.particles.material.uniforms.spinStateColor = { value: this.spinStateColor };
+                        orbitObject.particles.material.uniforms.spinStateColor = { value: spinStateColor };
                         orbitObject.particles.material.uniforms.spinStateRatio = { value: orbit.probabilityUnpaired };
                         orbitObject.particles.material.needsUpdate = true;
 
