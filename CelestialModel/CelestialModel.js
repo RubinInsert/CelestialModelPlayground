@@ -393,9 +393,10 @@ class CelestialModel {
     }
     async #createFromElectronConfig() {
         const individualOrbits = this.electronConfig.split(' ');
+        const lastTwoShells = individualOrbits.slice(-2); // Get the last two orbitals for visualization
         const orbitalPromises = [];
 
-        individualOrbits.forEach((orbit) => {
+        lastTwoShells.forEach((orbit) => {
             const orbitalLevel = parseInt(orbit[0]);
             this.highestOrbitalLevel = Math.max(this.highestOrbitalLevel, orbitalLevel);
             const orbitalType = orbit[1].toUpperCase();

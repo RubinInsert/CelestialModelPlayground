@@ -4,8 +4,8 @@ const float PI = 3.14159265359;
 const float a0 = 1.0; // Bohr radius
 float hash(vec2 p) {
     p = fract(p * vec2(123.34, 456.21));
-    p += dot(p, p + 78.233);
-    return fract(p.x * p.y);
+    p += dot(p, p + 45.32);
+    return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453);
 }
 // Dz² Orbital ---------------------------------------------------------
 float R_1s(float r) { 
