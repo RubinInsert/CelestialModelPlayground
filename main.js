@@ -72,7 +72,7 @@ window.addEventListener('resize', () => {
 
 
         //  auxilaryElement.THREEObject.position.set(5, 0, 0);
-         currentElement = new CelestialModel("Fe", 64);
+         currentElement = new CelestialModel("U", 128);
          await currentElement.create();
          window.currentObject = currentElement.THREEObject;
          currentElement.setSpinState(1.0);

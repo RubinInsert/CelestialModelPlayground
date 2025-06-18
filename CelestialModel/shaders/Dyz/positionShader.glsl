@@ -102,7 +102,7 @@ void main() {
     // Weight the lobes more heavily to balance the visualization
     //float boost = abs(angular) > 0.2 ? 1.5 : 1.0;
     float probDensity = radial * radial * angular * angular; //* boost;
-    if (probDensity < 0.5) discard; // or: if (U > probDensity) discard;
+    //if (probDensity < 0.5) discard; // or: if (U > probDensity) discard;
     // Apply density to scale outward motion, with emphasis on the lobes
     float finalR = r * abs(probDensity);
     
