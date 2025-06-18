@@ -296,13 +296,68 @@ class CelestialModel {
             console.warn(`No proton field radius defined for ${this.chemSymbol}. Proton field will not be created.`);
         }
         const protonFieldGeometry = new THREE.SphereGeometry(this.protonFieldRadius, 64, 64);
+        // Define the number of steps for the fresnel effect
+
+        const thicknessMaterial = new THREE.ShaderMaterial({
+            vertexShader: `
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+
+            void main() {
+                vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz); // Transform normal to world space
+                vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz; // Transform position to world space
+                gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPosition, 1.0);
+            }
+            `,
+            fragmentShader: `
+            uniform vec3 uCameraPosition; // Camera position passed as a uniform
+            uniform vec3 uColor; // Color passed as a uniform
+            varying vec3 vNormal;
+            varying vec3 vWorldPosition;
+
+            float stepFresnel(float fresnel, int steps) {
+                float s = float(steps);
+                float idx = floor(fresnel * s);
+                return idx / (s - 1.0);
+            }
+
+            void main() {
+                vec3 cameraDirection = normalize(uCameraPosition - vWorldPosition); // Calculate direction to the camera
+                float fresnel = pow(1.0 - abs(dot(normalize(vNormal), cameraDirection)), 1.5); // Fresnel effect (absolute value for both sides)
+
+                // Step the fresnel value into 4 bands
+                float stepped = stepFresnel(fresnel, 4);
+                vec3 color = mix(vec3(0.0, 0.0, 0.0), uColor, stepped);
+                gl_FragColor = vec4(color, stepped); // Use stepped for opacity
+            }
+            `,
+            uniforms: {
+            uCameraPosition: { value: new THREE.Vector3() }, // Initialize the uniform
+            uColor: { value: new THREE.Color(CelestialModel.#elementData[this.chemSymbol].emissionSpectra.at(-1)) }, // Pass the color as a uniform
+            },
+            transparent: true, // Enable transparency
+            depthWrite: false
+        });
+                /**
+                 * Animate the proton field's fresnel effect and color based on camera position.
+                 * This section should be called in your main animation/render loop.
+                 */
+                thicknessMaterial.onBeforeCompile = (shader) => {
+                    shader.uniforms.uCameraPosition = { value: new THREE.Vector3() };
+                    thicknessMaterial.userData.shader = shader;
+                };
+                thicknessMaterial.onBeforeRender = (renderer, scene, camera) => {
+                    if (thicknessMaterial.userData.shader) {
+                        thicknessMaterial.userData.shader.uniforms.uCameraPosition.value.copy(camera.position);
+                    }
+                };
         const protonFieldMaterial = new THREE.MeshBasicMaterial({
             color: CelestialModel.#elementData[this.chemSymbol].emissionSpectra.at(-1), // Default to red if no color is defined
             transparent: true,
             opacity: 0.5,
             depthWrite: false
         });
-        const protonField = new THREE.Mesh(protonFieldGeometry, protonFieldMaterial);
+        const protonField = new THREE.Mesh(protonFieldGeometry, thicknessMaterial);
         protonField.name = `${this.chemSymbol} Proton Field`;
         protonField.visible = false; // Initially set to not visible
         this.THREEObject.add(protonField);
@@ -438,14 +493,30 @@ class CelestialModel {
         });
     }
     showTopTwoOrbitals() {
-        this.orbitals.forEach((orbit, index) => {
-            if(orbit.orbitalLevel <= (this.highestOrbitalLevel - 2)) {
-                this.hideOrbital(index);
-            }
-            else {
-                this.showOrbital(index);
-            }
+        // this.orbitals.forEach((orbit, index) => { //        // Show only the top two ENERGY LEVELS
+        //     if(orbit.orbitalLevel <= (this.highestOrbitalLevel - 2)) {
+        //         this.hideOrbital(index);
+        //     }
+        //     else {
+        //         this.showOrbital(index);
+        //     }
+        // });
+        this.orbitals.forEach(orbit => {
+            orbit.particles.visible = false; // Hide all orbitals first
+            orbit.particles.material.visible = false; // Ensure the material is also hidden
         });
+        const orbitalOrderOfFilling = this.electronConfig.match(/\d+[spdf]\d+/g);
+        if (orbitalOrderOfFilling) {
+            const lastTwo = orbitalOrderOfFilling.slice(-2);
+            lastTwo.forEach(orbitStr => {
+                const [, level, type] = orbitStr.match(/(\d+)([spdf])/);
+                this.getOrbitals(type, parseInt(level)).forEach(orbit => {
+                    console.log(orbit);
+                    orbit.particles.visible = true;
+                    orbit.particles.material.visible = true; // Ensure the material is also visible
+                });
+            });
+        }
     }
     getTopTwoOrbitals() {
         return this.orbitals.filter(orbit => orbit.orbitalLevel >= (this.highestOrbitalLevel - 2));

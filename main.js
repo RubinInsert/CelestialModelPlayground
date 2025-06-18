@@ -14,7 +14,7 @@ document.getElementById('electron-config').addEventListener('change', async () =
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel(chemName, 64);
+        currentElement = new CelestialModel(chemName, 128);
         await currentElement.create();
         window.curE = currentElement;
         console.log('Scene objects:', SceneLoader.scene.children);

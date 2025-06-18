@@ -19,7 +19,6 @@ void main() {
     // vec3 finalColor = mix(neutral, targetColor, abs(mode));
 
     float alpha = (vPosition == vec3(0.0)) ? 0.0 : 1.0;
-
     gl_FragColor = vec4(neutral * spinStateFadeFactor, alpha);
 
 }
