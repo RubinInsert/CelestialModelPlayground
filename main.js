@@ -14,7 +14,7 @@ document.getElementById('electron-config').addEventListener('change', async () =
         if(currentElement) {
             currentElement.remove();
         }
-        currentElement = new CelestialModel(chemName, 128);
+        currentElement = new CelestialModel(chemName, 4096);
         await currentElement.create();
         window.curE = currentElement;
         console.log('Scene objects:', SceneLoader.scene.children);
@@ -69,7 +69,7 @@ window.addEventListener('resize', () => {
 //         // Bounding box
 // //         const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow color
 // // SceneLoader.scene.add(boxHelper);
-                currentElement = new CelestialModel("Fe", 64);
+                currentElement = new CelestialModel("Fe", 4096);
                 await currentElement.create();
 
         //  auxilaryElement.THREEObject.position.set(5, 0, 0);
