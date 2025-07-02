@@ -69,11 +69,11 @@ window.addEventListener('resize', () => {
 //         // Bounding box
 // //         const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow color
 // // SceneLoader.scene.add(boxHelper);
-
+                currentElement = new CelestialModel("Fe", 64);
+                await currentElement.create();
 
         //  auxilaryElement.THREEObject.position.set(5, 0, 0);
-         currentElement = new CelestialModel("U", 128);
-         await currentElement.create();
+
          window.currentObject = currentElement.THREEObject;
          currentElement.setSpinState(1.0);
         document.getElementById("currentElementDisplay").innerText = currentElement.chemSymbol;
@@ -86,56 +86,3 @@ window.addEventListener('resize', () => {
 })();
 
 
-
-function prototypeElementProtonField() {
-    const createFresnelMaterial = (color) => {
-        return new THREE.ShaderMaterial({
-            vertexShader: `
-                varying vec3 vNormal;
-                varying vec3 vWorldPosition;
-
-                void main() {
-                    vNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz); // Transform normal to world space
-                    vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz; // Transform position to world space
-                    gl_Position = projectionMatrix * viewMatrix * vec4(vWorldPosition, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform vec3 uCameraPosition; // Camera position passed as a uniform
-                uniform vec3 uColor; // Color passed as a uniform
-                varying vec3 vNormal;
-                varying vec3 vWorldPosition;
-
-                void main() {
-                    vec3 cameraDirection = normalize(uCameraPosition - vWorldPosition); // Calculate direction to the camera
-                    float fresnel = pow(1.0 - abs(dot(normalize(vNormal), cameraDirection)), 3.0); // Fresnel effect (absolute value for both sides)
-
-                    vec3 color = mix(vec3(0.0, 0.0, 0.0), uColor, fresnel); // Use uColor for the gradient
-                    gl_FragColor = vec4(color, fresnel); // Use fresnel for opacity
-                }
-            `,
-            uniforms: {
-                uCameraPosition: { value: new THREE.Vector3() }, // Initialize the uniform
-                uColor: { value: new THREE.Color(color) }, // Pass the color as a uniform
-            },
-            transparent: true, // Enable transparency
-        });
-    };
-    
-    // Create two spheres
-    const ironGeometry = new THREE.SphereGeometry(40 - 5, 64, 64);
-const sphere1 = new THREE.Mesh(ironGeometry, ironMaterial); // Dark Turquoise color
-SceneLoader.scene.add(sphere1);
-sphere1.visible = false; // Initially set to not visible
-const oxygenGeometry = new THREE.SphereGeometry(12, 64, 64);
-const oxygenMaterial = new THREE.MeshBasicMaterial({
-    color: 0xffa500, // Dark Turquoise color
-    transparent: true,
-    opacity: 0.3, // Adjust opacity for transparency
-});
-const sphere2 = new THREE.Mesh(oxygenGeometry, oxygenMaterial);
-sphere2.visible = false; // Initially set to not visible
-SceneLoader.scene.add(sphere2);
-sphere1.renderOrder = 999;
-sphere2.renderOrder = 1000; // Set render order to ensure correct rendering (Opacity)
-}
