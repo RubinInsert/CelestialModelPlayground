@@ -27,6 +27,6 @@ void main() {
 
     float alpha = (vPosition == vec3(0.0)) ? 0.0 : 1.0;
 
-    gl_FragColor = vec4(finalColor, alpha);
+    gl_FragColor = vec4(finalColor * 2.0, alpha);
 
 }
