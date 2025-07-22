@@ -1,156 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Three.js Live Server</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
     <script type="importmap">
-        {
-          "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
-            "three/examples/": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/",
-            "papaparse": "https://cdn.jsdelivr.net/npm/papaparse@latest/+esm"
-          }
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@latest/build/three.module.js",
+          "three/examples/": "https://cdn.jsdelivr.net/npm/three@latest/examples/jsm/",
+          "papaparse": "https://cdn.jsdelivr.net/npm/papaparse@latest/+esm"
         }
-      </script>
+      }
+    </script>
     <script type="module" src="main.js"></script>
-    <h1 style="position: absolute; font-family: monospace; display: inline;">Current Element: <div id="currentElementDisplay" style="display: inline;">Fe</div></h1>
-    <div id="config-chooser-container">
-      <input list="elements" id="electron-config" placeholder="He" />
-      <datalist id="elements">
-          <option value="H"></option>
-          <option value="He"></option>
-          <option value="Li"></option>
-          <option value="Be"></option>
-          <option value="B"></option>
-          <option value="C"></option>
-          <option value="N"></option>
-          <option value="O"></option>
-          <option value="F"></option>
-          <option value="Ne"></option>
-          <option value="Na"></option>
-          <option value="Mg"></option>
-          <option value="Al"></option>
-          <option value="Si"></option>
-          <option value="P"></option>
-          <option value="S"></option>
-          <option value="Cl"></option>
-          <option value="Ar"></option>
-          <option value="K"></option>
-          <option value="Ca"></option>
-          <option value="Sc"></option>
-          <option value="Ti"></option>
-          <option value="V"></option>
-          <option value="Cr"></option>
-          <option value="Mn"></option>
-          <option value="Fe"></option>
-          <option value="Co"></option>
-          <option value="Ni"></option>
-          <option value="Cu"></option>
-          <option value="Zn"></option>
-          <option value="Ga"></option>
-          <option value="Ge"></option>
-          <option value="As"></option>
-          <option value="Se"></option>
-          <option value="Br"></option>
-          <option value="Kr"></option>
-          <option value="Rb"></option>
-          <option value="Sr"></option>
-          <option value="Y"></option>
-          <option value="Zr"></option>
-          <option value="Nb"></option>
-          <option value="Mo"></option>
-          <option value="Tc"></option>
-          <option value="Ru"></option>
-          <option value="Rh"></option>
-          <option value="Pd"></option>
-          <option value="Ag"></option>
-          <option value="Cd"></option>
-          <option value="In"></option>
-          <option value="Sn"></option>
-          <option value="Sb"></option>
-          <option value="Te"></option>
-          <option value="I"></option>
-          <option value="Xe"></option>
-          <option value="Cs"></option>
-          <option value="Ba"></option>
-          <option value="La"></option>
-          <option value="Ce"></option>
-          <option value="Pr"></option>
-          <option value="Nd"></option>
-          <option value="Pm"></option>
-          <option value="Sm"></option>
-          <option value="Eu"></option>
-          <option value="Gd"></option>
-          <option value="Tb"></option>
-          <option value="Dy"></option>
-          <option value="Ho"></option>
-          <option value="Er"></option>
-          <option value="Tm"></option>
-          <option value="Yb"></option>
-          <option value="Lu"></option>
-          <option value="Hf"></option>
-          <option value="Ta"></option>
-          <option value="W"></option>
-          <option value="Re"></option>
-          <option value="Os"></option>
-          <option value="Ir"></option>
-          <option value="Pt"></option>
-          <option value="Au"></option>
-          <option value="Hg"></option>
-          <option value="Tl"></option>
-          <option value="Pb"></option>
-          <option value="Bi"></option>
-          <option value="Po"></option>
-          <option value="At"></option>
-          <option value="Rn"></option>
-          <option value="Fr"></option>
-          <option value="Ra"></option>
-          <option value="Ac"></option>
-          <option value="Th"></option>
-          <option value="Pa"></option>
-          <option value="U"></option>
-      </datalist>
+    <div id="controls">
       <div id="timestep-slider-container">
         <label for="timestep-slider">Time Step:</label>
-        <input type="range" id="timestep-slider" min="0.01" max="10" step="0.01" value="5">
+        <input
+          type="range"
+          id="timestep-slider"
+          min="0.01"
+          max="10"
+          step="0.01"
+          value="5"
+        />
         <span id="timestep-value">5</span>
       </div>
       <div id="proton-fields-toggle">
         <label>
-          <input type="checkbox" id="enable-proton-fields">
+          <input type="checkbox" id="enable-proton-fields" />
           Enable Proton Fields
         </label>
       </div>
-        <div id="spin-state-toggle">
+      <div id="spin-state-toggle">
         <label>
-          <input type="checkbox" id="enable-spin-state">
+          <input type="checkbox" id="enable-spin-state" />
           Enable Spin State Visualization
         </label>
       </div>
       <script>
-        const slider = document.getElementById('timestep-slider');
-        const valueDisplay = document.getElementById('timestep-value');
-        slider.addEventListener('input', () => {
+        const slider = document.getElementById("timestep-slider");
+        const valueDisplay = document.getElementById("timestep-value");
+        slider.addEventListener("input", () => {
           valueDisplay.textContent = slider.value;
           // You can dispatch a custom event or call your update function here
         });
       </script>
-      <!-- <div id="sphere-toggles">
-        <label>
-            <input type="checkbox" id="toggle-sphere-1">
-            Toggle Fe Proton Sphere Example
-        </label>
-        <label>
-            <input type="checkbox" id="toggle-sphere-2">
-            Toggle O Proton Sphere Example
-        </label>
-    </div> -->
     </div>
-</body>
+  </body>
 </html>

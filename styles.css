@@ -1,19 +1,32 @@
-html, body {
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    height: 100%;
-    color: white;;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  height: 100%;
+  color: white;
 }
 
 canvas {
-    display: block;
+  display: block;
+}
+
+#controls {
+  position: absolute;
+  bottom: 2vh;
+  left: 2vh;
+  margin: 0;
+  padding: 10px;
+  background-color: #1d2d44;
+  z-index: 1000;
+  border-radius: 20px;
+  opacity: 0.8;
 }
 
 #config-chooser-container {
-    position:absolute;
-    bottom: 0;
-    padding: 5px;
-    width:  fit-content;
-    height: fit-content;
+  position: absolute;
+  bottom: 0;
+  padding: 5px;
+  width: fit-content;
+  height: fit-content;
 }
