@@ -7,7 +7,10 @@ function getElementFromQuery() {
   const params = new URLSearchParams(window.location.search);
   return params.get("Element");
 }
-
+function isControlsEnabledFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("Controls") === "true";
+}
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 1);
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Px, 1);
 const scaleFactor = 1;
@@ -83,6 +86,9 @@ window.addEventListener("resize", () => {
   SceneLoader.renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (async () => {
+  if(isControlsEnabledFromQuery()) {
+    document.getElementById("controls").style.display = "block";
+  }
   await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
   animate();
   let initialElement = getElementFromQuery() || "Fe";
