@@ -4,6 +4,10 @@ import { EffectComposer } from "three/examples/postprocessing/EffectComposer.js"
 import { RenderPass } from "three/examples/postprocessing/RenderPass.js";
 import { UnrealBloomPass } from "three/examples/postprocessing/UnrealBloomPass.js";
 import { OutputPass } from "three/examples/postprocessing/OutputPass.js";
+function isControlsEnabledFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("Controls") === "true";
+}
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
   75,
@@ -27,7 +31,7 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.target.set(0, 0, 0);
 controls.enableDamping = true; // Optional: for smoother controls
 controls.enablePan = false;
-controls.enableZoom = true;
+controls.enableZoom = isControlsEnabledFromQuery();
 controls.enableRotate = true;
 controls.dampingFactor = 0.05;
 controls.update();
