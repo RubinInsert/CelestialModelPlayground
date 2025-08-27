@@ -2,59 +2,68 @@ import * as THREE from "three";
 import CelestialModel from "./CelestialModel/CelestialModel.js";
 import * as SceneLoader from "./SceneLoader.js";
 
+// Get the "Element" query parameter from the URL
+function getElementFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("Element");
+}
+function isControlsEnabledFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  return params.get("Controls") === "true";
+}
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Dxy, 1);
 //CelestialModel.createOrbital(64, CelestialModel.OrbitalType.Px, 1);
 const scaleFactor = 1;
 let currentElement = null;
-document
-  .getElementById("electron-config")
-  .addEventListener("change", async () => {
-    const chemName = document.getElementById("electron-config").value.trim();
-    if (chemName) {
-      // Call createFromElectronConfig with the input value
-      if (currentElement) {
-        currentElement.remove();
-      }
-      currentElement = new CelestialModel(chemName, 4096);
-      await currentElement.create();
-      window.curE = currentElement;
-      console.log("Scene objects:", SceneLoader.scene.children);
-      document.getElementById("currentElementDisplay").innerText =
-        currentElement.chemSymbol;
-      console.log(currentElement);
-      //SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
-      document.getElementById("electron-config").value = ""; // Clear the input field after loading
-    } else {
-      console.error("Electron configuration input is empty.");
-    }
-    if (document.getElementById("enable-proton-fields").checked) {
-      currentElement.setProtonFieldVisibility(true);
-    }
-    if (document.getElementById("enable-spin-state").checked) {
-      currentElement.setSpinStateVisualization(true);
-    }
-  });
-document
-  .getElementById("timestep-slider")
-  .addEventListener("input", (event) => {
-    CelestialModel.timeStep = parseFloat(event.target.value);
-  });
-document
-  .getElementById("enable-proton-fields")
-  .addEventListener("change", (event) => {
-    const isChecked = event.target.checked;
-    if (currentElement) {
-      currentElement.setProtonFieldVisibility(isChecked);
-    }
-  });
-document
-  .getElementById("enable-spin-state")
-  .addEventListener("change", (event) => {
-    const isChecked = event.target.checked;
-    if (currentElement) {
-      currentElement.setSpinStateVisualization(isChecked);
-    }
-  });
+// document
+//   .getElementById("electron-config")
+//   .addEventListener("change", async () => {
+//     const chemName = document.getElementById("electron-config").value.trim();
+//     if (chemName) {
+//       // Call createFromElectronConfig with the input value
+//       if (currentElement) {
+//         currentElement.remove();
+//       }
+//       currentElement = new CelestialModel(chemName, 4096);
+//       await currentElement.create();
+//       window.curE = currentElement;
+//       console.log("Scene objects:", SceneLoader.scene.children);
+//       document.getElementById("currentElementDisplay").innerText =
+//         currentElement.chemSymbol;
+//       console.log(currentElement);
+//       //SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
+//       document.getElementById("electron-config").value = ""; // Clear the input field after loading
+//     } else {
+//       console.error("Electron configuration input is empty.");
+//     }
+//     if (document.getElementById("enable-proton-fields").checked) {
+//       currentElement.setProtonFieldVisibility(true);
+//     }
+//     if (document.getElementById("enable-spin-state").checked) {
+//       currentElement.setSpinStateVisualization(true);
+//     }
+//   });
+// document
+//   .getElementById("timestep-slider")
+//   .addEventListener("input", (event) => {
+//     CelestialModel.timeStep = parseFloat(event.target.value);
+//   });
+// document
+//   .getElementById("enable-proton-fields")
+//   .addEventListener("change", (event) => {
+//     const isChecked = event.target.checked;
+//     if (currentElement) {
+//       currentElement.setProtonFieldVisibility(isChecked);
+//     }
+//   });
+// document
+//   .getElementById("enable-spin-state")
+//   .addEventListener("change", (event) => {
+//     const isChecked = event.target.checked;
+//     if (currentElement) {
+//       currentElement.setSpinStateVisualization(isChecked);
+//     }
+//   });
 
 setInterval(() => {
   // Every 15 seconeds toggle the spin state visualization
@@ -77,15 +86,22 @@ window.addEventListener("resize", () => {
   SceneLoader.renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (async () => {
+  if(isControlsEnabledFromQuery()) {
+    document.getElementById("controls").style.display = "block";
+  }
   await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
   animate();
+  let initialElement = getElementFromQuery() || "Fe";
+  currentElement = new CelestialModel(initialElement, 4096);
+  await currentElement.create();
+  SceneLoader.fitCameraToBoundingBox(currentElement.boundingBox);
   // let auxilaryElement = new CelestialModel("H", 64);
   // await auxilaryElement.create();
   //         // Bounding box
   // //         const boxHelper = new THREE.Box3Helper(currentElement.boundingBox, 0xffff00); // Yellow color
   // // SceneLoader.scene.add(boxHelper);
-  currentElement = new CelestialModel("Fe", 4096);
-  await currentElement.create();
+  // currentElement = new CelestialModel("Fe", 4096);
+  // await currentElement.create();
 
   //  auxilaryElement.THREEObject.position.set(5, 0, 0);
 
