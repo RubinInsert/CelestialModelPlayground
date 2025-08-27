@@ -43,27 +43,27 @@ let currentElement = null;
 //       currentElement.setSpinStateVisualization(true);
 //     }
 //   });
-// document
-//   .getElementById("timestep-slider")
-//   .addEventListener("input", (event) => {
-//     CelestialModel.timeStep = parseFloat(event.target.value);
-//   });
-// document
-//   .getElementById("enable-proton-fields")
-//   .addEventListener("change", (event) => {
-//     const isChecked = event.target.checked;
-//     if (currentElement) {
-//       currentElement.setProtonFieldVisibility(isChecked);
-//     }
-//   });
-// document
-//   .getElementById("enable-spin-state")
-//   .addEventListener("change", (event) => {
-//     const isChecked = event.target.checked;
-//     if (currentElement) {
-//       currentElement.setSpinStateVisualization(isChecked);
-//     }
-//   });
+document
+  .getElementById("timestep-slider")
+  .addEventListener("input", (event) => {
+    CelestialModel.timeStep = parseFloat(event.target.value);
+  });
+document
+  .getElementById("enable-proton-fields")
+  .addEventListener("change", (event) => {
+    const isChecked = event.target.checked;
+    if (currentElement) {
+      currentElement.setProtonFieldVisibility(isChecked);
+    }
+  });
+document
+  .getElementById("enable-spin-state")
+  .addEventListener("change", (event) => {
+    const isChecked = event.target.checked;
+    if (currentElement) {
+      currentElement.setSpinStateVisualization(isChecked);
+    }
+  });
 
 setInterval(() => {
   // Every 15 seconeds toggle the spin state visualization
@@ -86,7 +86,7 @@ window.addEventListener("resize", () => {
   SceneLoader.renderer.setSize(window.innerWidth, window.innerHeight);
 });
 (async () => {
-  if(isControlsEnabledFromQuery()) {
+  if (isControlsEnabledFromQuery()) {
     document.getElementById("controls").style.display = "block";
   }
   await CelestialModel.init(SceneLoader.scene, SceneLoader.renderer);
